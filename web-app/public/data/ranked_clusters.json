@@ -1,0 +1,431 @@
+[
+  {
+    "id": "cluster_13",
+    "center_lat": 37.4142,
+    "center_lng": -79.14105,
+    "targets": [
+      {
+        "id": "lynchburg_23",
+        "address": "100 Main St, Lynchburg, VA",
+        "lat": 37.4138,
+        "lng": -79.1422,
+        "lmi": true,
+        "kwh": 1327,
+        "owner": true,
+        "sqft": 1597,
+        "year": 1980,
+        "score": 99
+      },
+      {
+        "id": "lynchburg_24",
+        "address": "200 Church St, Lynchburg, VA",
+        "lat": 37.415,
+        "lng": -79.14,
+        "lmi": true,
+        "kwh": 1353,
+        "owner": true,
+        "sqft": 1821,
+        "year": 2000,
+        "score": 99
+      },
+      {
+        "id": "lynchburg_25",
+        "address": "300 Court St, Lynchburg, VA",
+        "lat": 37.412,
+        "lng": -79.144,
+        "lmi": true,
+        "kwh": 1229,
+        "owner": true,
+        "sqft": 1370,
+        "year": 2001,
+        "score": 99
+      },
+      {
+        "id": "lynchburg_26",
+        "address": "400 Federal St, Lynchburg, VA",
+        "lat": 37.416,
+        "lng": -79.138,
+        "lmi": true,
+        "kwh": 1340,
+        "owner": false,
+        "sqft": 1299,
+        "year": 1978,
+        "score": 99
+      }
+    ],
+    "total_score": 396,
+    "avg_score": 99.0
+  },
+  {
+    "id": "cluster_1",
+    "center_lat": 36.8529,
+    "center_lng": -76.28656666666666,
+    "targets": [
+      {
+        "id": "hampton_roads_1",
+        "address": "123 Ocean View Ave, Norfolk, VA",
+        "lat": 36.8529,
+        "lng": -76.2859,
+        "lmi": true,
+        "kwh": 1202,
+        "owner": true,
+        "sqft": 1207,
+        "year": 1968,
+        "score": 99
+      },
+      {
+        "id": "hampton_roads_3",
+        "address": "789 Harbor Dr, Norfolk, VA",
+        "lat": 36.8509,
+        "lng": -76.2839,
+        "lmi": true,
+        "kwh": 959,
+        "owner": true,
+        "sqft": 1924,
+        "year": 1988,
+        "score": 99
+      },
+      {
+        "id": "hampton_roads_4",
+        "address": "321 Maritime Way, Norfolk, VA",
+        "lat": 36.8549,
+        "lng": -76.2899,
+        "lmi": true,
+        "kwh": 1290,
+        "owner": true,
+        "sqft": 1486,
+        "year": 1986,
+        "score": 99
+      }
+    ],
+    "total_score": 297,
+    "avg_score": 99.0
+  },
+  {
+    "id": "cluster_3",
+    "center_lat": 36.842999999999996,
+    "center_lng": -76.02999999999999,
+    "targets": [
+      {
+        "id": "hampton_roads_6",
+        "address": "987 Shore Rd, Virginia Beach, VA",
+        "lat": 36.843,
+        "lng": -76.03,
+        "lmi": true,
+        "kwh": 1067,
+        "owner": true,
+        "sqft": 1361,
+        "year": 1984,
+        "score": 99
+      },
+      {
+        "id": "hampton_roads_7",
+        "address": "147 Atlantic Ave, Virginia Beach, VA",
+        "lat": 36.845,
+        "lng": -76.028,
+        "lmi": true,
+        "kwh": 1558,
+        "owner": false,
+        "sqft": 2425,
+        "year": 1993,
+        "score": 99
+      },
+      {
+        "id": "hampton_roads_8",
+        "address": "258 Sandbridge Rd, Virginia Beach, VA",
+        "lat": 36.841,
+        "lng": -76.032,
+        "lmi": true,
+        "kwh": 1373,
+        "owner": true,
+        "sqft": 1991,
+        "year": 1989,
+        "score": 99
+      }
+    ],
+    "total_score": 297,
+    "avg_score": 99.0
+  },
+  {
+    "id": "cluster_5",
+    "center_lat": 37.540699999999994,
+    "center_lng": -77.43533333333333,
+    "targets": [
+      {
+        "id": "richmond_11",
+        "address": "100 Church Hill Rd, Richmond, VA",
+        "lat": 37.5407,
+        "lng": -77.436,
+        "lmi": true,
+        "kwh": 854,
+        "owner": true,
+        "sqft": 2446,
+        "year": 1974,
+        "score": 99
+      },
+      {
+        "id": "richmond_12",
+        "address": "225 Broad St, Richmond, VA",
+        "lat": 37.5387,
+        "lng": -77.432,
+        "lmi": true,
+        "kwh": 963,
+        "owner": false,
+        "sqft": 2158,
+        "year": 1998,
+        "score": 99
+      },
+      {
+        "id": "richmond_13",
+        "address": "450 Grace St, Richmond, VA",
+        "lat": 37.5427,
+        "lng": -77.438,
+        "lmi": true,
+        "kwh": 1450,
+        "owner": true,
+        "sqft": 1545,
+        "year": 1992,
+        "score": 99
+      }
+    ],
+    "total_score": 297,
+    "avg_score": 99.0
+  },
+  {
+    "id": "cluster_11",
+    "center_lat": 37.22796666666667,
+    "center_lng": -77.402,
+    "targets": [
+      {
+        "id": "petersburg_19",
+        "address": "100 Sycamore St, Petersburg, VA",
+        "lat": 37.2279,
+        "lng": -77.402,
+        "lmi": true,
+        "kwh": 1579,
+        "owner": false,
+        "sqft": 1959,
+        "year": 1989,
+        "score": 99
+      },
+      {
+        "id": "petersburg_20",
+        "address": "200 Washington St, Petersburg, VA",
+        "lat": 37.23,
+        "lng": -77.4,
+        "lmi": true,
+        "kwh": 1521,
+        "owner": true,
+        "sqft": 2562,
+        "year": 1986,
+        "score": 99
+      },
+      {
+        "id": "petersburg_21",
+        "address": "300 Market St, Petersburg, VA",
+        "lat": 37.226,
+        "lng": -77.404,
+        "lmi": true,
+        "kwh": 1364,
+        "owner": true,
+        "sqft": 1717,
+        "year": 1964,
+        "score": 99
+      }
+    ],
+    "total_score": 297,
+    "avg_score": 99.0
+  },
+  {
+    "id": "cluster_2",
+    "center_lat": 36.847899999999996,
+    "center_lng": -76.28989999999999,
+    "targets": [
+      {
+        "id": "hampton_roads_2",
+        "address": "456 Chesapeake Blvd, Norfolk, VA",
+        "lat": 36.8489,
+        "lng": -76.2919,
+        "lmi": true,
+        "kwh": 1207,
+        "owner": false,
+        "sqft": 2004,
+        "year": 1983,
+        "score": 99
+      },
+      {
+        "id": "hampton_roads_5",
+        "address": "654 Waterfront St, Norfolk, VA",
+        "lat": 36.8469,
+        "lng": -76.2879,
+        "lmi": true,
+        "kwh": 1565,
+        "owner": true,
+        "sqft": 2015,
+        "year": 2000,
+        "score": 99
+      }
+    ],
+    "total_score": 198,
+    "avg_score": 99.0
+  },
+  {
+    "id": "cluster_4",
+    "center_lat": 36.769000000000005,
+    "center_lng": -76.286,
+    "targets": [
+      {
+        "id": "hampton_roads_9",
+        "address": "369 Tidewater Dr, Chesapeake, VA",
+        "lat": 36.768,
+        "lng": -76.287,
+        "lmi": true,
+        "kwh": 1593,
+        "owner": true,
+        "sqft": 1947,
+        "year": 1988,
+        "score": 99
+      },
+      {
+        "id": "hampton_roads_10",
+        "address": "741 Deep Creek Blvd, Chesapeake, VA",
+        "lat": 36.77,
+        "lng": -76.285,
+        "lmi": true,
+        "kwh": 1140,
+        "owner": true,
+        "sqft": 2532,
+        "year": 1973,
+        "score": 99
+      }
+    ],
+    "total_score": 198,
+    "avg_score": 99.0
+  },
+  {
+    "id": "cluster_6",
+    "center_lat": 37.555,
+    "center_lng": -77.47,
+    "targets": [
+      {
+        "id": "richmond_14",
+        "address": "333 Monument Ave, Richmond, VA",
+        "lat": 37.555,
+        "lng": -77.47,
+        "lmi": true,
+        "kwh": 1258,
+        "owner": true,
+        "sqft": 2431,
+        "year": 1964,
+        "score": 99
+      }
+    ],
+    "total_score": 99,
+    "avg_score": 99.0
+  },
+  {
+    "id": "cluster_7",
+    "center_lat": 37.535,
+    "center_lng": -77.44,
+    "targets": [
+      {
+        "id": "richmond_15",
+        "address": "567 Cary St, Richmond, VA",
+        "lat": 37.535,
+        "lng": -77.44,
+        "lmi": true,
+        "kwh": 1243,
+        "owner": true,
+        "sqft": 2184,
+        "year": 1986,
+        "score": 99
+      }
+    ],
+    "total_score": 99,
+    "avg_score": 99.0
+  },
+  {
+    "id": "cluster_8",
+    "center_lat": 37.52,
+    "center_lng": -77.45,
+    "targets": [
+      {
+        "id": "richmond_16",
+        "address": "890 Hull St, Richmond, VA",
+        "lat": 37.52,
+        "lng": -77.45,
+        "lmi": true,
+        "kwh": 1370,
+        "owner": true,
+        "sqft": 1773,
+        "year": 2009,
+        "score": 99
+      }
+    ],
+    "total_score": 99,
+    "avg_score": 99.0
+  },
+  {
+    "id": "cluster_9",
+    "center_lat": 37.57,
+    "center_lng": -77.41,
+    "targets": [
+      {
+        "id": "richmond_17",
+        "address": "123 Laburnum Ave, Henrico, VA",
+        "lat": 37.57,
+        "lng": -77.41,
+        "lmi": true,
+        "kwh": 1260,
+        "owner": true,
+        "sqft": 1575,
+        "year": 1967,
+        "score": 99
+      }
+    ],
+    "total_score": 99,
+    "avg_score": 99.0
+  },
+  {
+    "id": "cluster_10",
+    "center_lat": 37.575,
+    "center_lng": -77.39,
+    "targets": [
+      {
+        "id": "richmond_18",
+        "address": "456 Mechanicsville Tpke, Henrico, VA",
+        "lat": 37.575,
+        "lng": -77.39,
+        "lmi": true,
+        "kwh": 961,
+        "owner": true,
+        "sqft": 1719,
+        "year": 1975,
+        "score": 99
+      }
+    ],
+    "total_score": 99,
+    "avg_score": 99.0
+  },
+  {
+    "id": "cluster_12",
+    "center_lat": 37.232,
+    "center_lng": -77.398,
+    "targets": [
+      {
+        "id": "petersburg_22",
+        "address": "400 High St, Petersburg, VA",
+        "lat": 37.232,
+        "lng": -77.398,
+        "lmi": true,
+        "kwh": 936,
+        "owner": true,
+        "sqft": 1618,
+        "year": 1964,
+        "score": 99
+      }
+    ],
+    "total_score": 99,
+    "avg_score": 99.0
+  }
+]

@@ -1,0 +1,66 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Print styles for street sheet */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .street-sheet {
+    display: block !important;
+  }
+
+  body {
+    background: white !important;
+  }
+}
+
+.street-sheet {
+  display: none;
+}
+
+@media print {
+  .street-sheet {
+    display: block;
+    padding: 20px;
+    font-size: 12px;
+  }
+
+  .street-sheet table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .street-sheet th,
+  .street-sheet td {
+    border: 1px solid #000;
+    padding: 6px 8px;
+    text-align: left;
+  }
+
+  .street-sheet th {
+    background: #f0f0f0;
+    font-weight: bold;
+  }
+
+  .street-sheet .header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .street-sheet .result-box {
+    width: 60px;
+    height: 20px;
+    border: 1px solid #999;
+    display: inline-block;
+  }
+}
