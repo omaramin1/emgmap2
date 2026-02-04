@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Area Planner | EMG Solar Territory Management</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a2e;
+            --bg-card: #16162a;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --text-muted: #6b6b7b;
+            --accent-green: #00ff88;
+            --accent-blue: #00bfff;
+            --accent-purple: #8b5cf6;
+            --accent-orange: #ff9500;
+            --accent-red: #ff4757;
+            --accent-yellow: #ffd93d;
+            --border-color: #2a2a3e;
+            --shadow: 0 4px 24px rgba(0,0,0,0.4);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-brand h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-link {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,191,255,0.2));
+            color: var(--accent-green);
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: grid;
+            grid-template-columns: 320px 1fr 380px;
+            height: calc(100vh - 60px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .sidebar-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Filter Cards */
+        .filter-group {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .filter-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .filter-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        /* Priority Buttons */
+        .priority-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .priority-btn {
+            flex: 1;
+            min-width: 80px;
+            padding: 0.75rem 0.5rem;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .priority-btn:hover {
+            border-color: var(--text-secondary);
+        }
+
+        .priority-btn.active {
+            border-color: var(--accent-green);
+            background: rgba(0,255,136,0.1);
+            color: var(--accent-green);
+        }
+
+        .priority-btn.fresh.active {
+            border-color: var(--accent-green);
+            background: rgba(0,255,136,0.15);
+            color: var(--accent-green);
+        }
+
+        .priority-btn.moderate.active {
+            border-color: var(--accent-yellow);
+            background: rgba(255,217,61,0.15);
+            color: var(--accent-yellow);
+        }
+
+        .priority-btn.saturated.active {
+            border-color: var(--accent-red);
+            background: rgba(255,71,87,0.15);
+            color: var(--accent-red);
+        }
+
+        .priority-count {
+            display: block;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Range Slider */
+        .range-slider {
+            margin: 1rem 0;
+        }
+
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .range-value {
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--bg-tertiary);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,191,255,0.4);
+        }
+
+        /* Region List */
+        .region-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .region-item {
+            display: flex;
+            align-items: center;
+            padding: 0.6rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .region-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .region-checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            margin-right: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .region-item.selected .region-checkbox {
+            background: var(--accent-green);
+            border-color: var(--accent-green);
+        }
+
+        .region-item.selected .region-checkbox::after {
+            content: '✓';
+            color: var(--bg-primary);
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .region-name {
+            flex: 1;
+            font-size: 0.85rem;
+        }
+
+        .region-routes {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            padding: 0.2rem 0.5rem;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+        }
+
+        /* Map Container */
+        .map-container {
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Map Controls Overlay */
+        .map-overlay {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 999;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .map-control-btn {
+            padding: 0.6rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+
+        .map-control-btn:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-blue);
+        }
+
+        .map-control-btn.active {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+
+        /* Stats Overlay */
+        .stats-overlay {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            right: 1rem;
+            z-index: 999;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: rgba(22, 22, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-value.green { color: var(--accent-green); }
+        .stat-value.blue { color: var(--accent-blue); }
+        .stat-value.orange { color: var(--accent-orange); }
+        .stat-value.purple { color: var(--accent-purple); }
+
+        .stat-change {
+            font-size: 0.75rem;
+            color: var(--accent-green);
+            margin-top: 0.25rem;
+        }
+
+        /* Right Panel */
+        .right-panel {
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border-color);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 1rem;
+        }
+
+        .panel-tab {
+            padding: 1rem 1.25rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .panel-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .panel-tab.active {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+        }
+
+        .panel-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        /* Weekly Planner */
+        .week-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .week-nav {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .week-nav-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .week-nav-btn:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .day-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .day-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .day-card:hover {
+            border-color: var(--accent-blue);
+            transform: translateX(4px);
+        }
+
+        .day-card.active {
+            border-color: var(--accent-green);
+            background: rgba(0,255,136,0.05);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .day-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .day-date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .day-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .day-stat {
+            text-align: center;
+            padding: 0.5rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+
+        .day-stat-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+        }
+
+        .day-stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .day-route {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .route-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .route-priority {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .route-priority.fresh { background: var(--accent-green); }
+        .route-priority.moderate { background: var(--accent-yellow); }
+        .route-priority.saturated { background: var(--accent-red); }
+
+        .route-name {
+            font-size: 0.85rem;
+        }
+
+        .route-kwh {
+            font-size: 0.8rem;
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        /* Route Details */
+        .route-details {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .route-details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .route-details-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .route-details-badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .route-details-badge.fresh {
+            background: rgba(0,255,136,0.15);
+            color: var(--accent-green);
+        }
+
+        .route-details-badge.moderate {
+            background: rgba(255,217,61,0.15);
+            color: var(--accent-yellow);
+        }
+
+        .route-details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .detail-item {
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        /* Progress Ring */
+        .progress-ring-container {
+            display: flex;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+
+        .progress-ring {
+            position: relative;
+            width: 120px;
+            height: 120px;
+        }
+
+        .progress-ring svg {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-bg {
+            fill: none;
+            stroke: var(--bg-tertiary);
+            stroke-width: 8;
+        }
+
+        .progress-ring-fill {
+            fill: none;
+            stroke: var(--accent-green);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 339.292;
+            stroke-dashoffset: 339.292;
+            transition: stroke-dashoffset 1s ease;
+        }
+
+        .progress-ring-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .progress-ring-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .progress-ring-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        /* Charts */
+        .chart-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .chart-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .chart-wrapper {
+            height: 200px;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 0.85rem 1rem;
+            border-radius: 10px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            color: var(--bg-primary);
+        }
+
+        .action-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,255,136,0.3);
+        }
+
+        .action-btn.secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .action-btn.secondary:hover {
+            border-color: var(--accent-blue);
+        }
+
+        /* Rep Assignment */
+        .rep-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .rep-card {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background: var(--bg-card);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .rep-card:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .rep-card.assigned {
+            border-color: var(--accent-green);
+            background: rgba(0,255,136,0.05);
+        }
+
+        .rep-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 0.75rem;
+        }
+
+        .rep-info {
+            flex: 1;
+        }
+
+        .rep-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .rep-stats {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .rep-conversion {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent-green);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Hidden panels */
+        .panel-section {
+            display: none;
+        }
+
+        .panel-section.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .main-container {
+                grid-template-columns: 280px 1fr 340px;
+            }
+        }
+
+        @media (max-width: 1100px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar, .right-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-brand">
+            <h1>EMG Territory Planner</h1>
+        </div>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">Map View</a>
+            <a href="planner.html" class="nav-link active">Area Planner</a>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Left Sidebar - Filters -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">
+                    <span>Priority Filter</span>
+                </div>
+                <div class="priority-buttons">
+                    <button class="priority-btn fresh active" onclick="togglePriority('fresh')">
+                        <span class="priority-count" id="fresh-count">791</span>
+                        Fresh
+                    </button>
+                    <button class="priority-btn moderate" onclick="togglePriority('moderate')">
+                        <span class="priority-count" id="moderate-count">320</span>
+                        Moderate
+                    </button>
+                    <button class="priority-btn saturated" onclick="togglePriority('saturated')">
+                        <span class="priority-count" id="saturated-count">388</span>
+                        Saturated
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Conversion Rate</div>
+                <div class="filter-group">
+                    <div class="range-slider">
+                        <div class="range-labels">
+                            <span>Min: <span class="range-value" id="conv-min">30%</span></span>
+                            <span>Max: <span class="range-value" id="conv-max">70%</span></span>
+                        </div>
+                        <input type="range" id="conv-range" min="20" max="70" value="30" oninput="updateConvFilter(this.value)">
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Regions</div>
+                <div class="filter-group">
+                    <div class="region-list" id="region-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Quick Actions</div>
+                <div class="action-buttons" style="flex-direction: column;">
+                    <button class="action-btn primary" onclick="autoAssignRoutes()">
+                        Auto-Assign Week
+                    </button>
+                    <button class="action-btn secondary" onclick="exportPlan()">
+                        Export Plan
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Map -->
+        <div class="map-container">
+            <div id="map"></div>
+
+            <div class="map-overlay">
+                <button class="map-control-btn active" onclick="setMapView('zones')">Zones</button>
+                <button class="map-control-btn" onclick="setMapView('routes')">Routes</button>
+                <button class="map-control-btn" onclick="setMapView('heatmap')">Heat Map</button>
+            </div>
+
+            <div class="stats-overlay">
+                <div class="stat-card">
+                    <div class="stat-label">Selected Routes</div>
+                    <div class="stat-value green" id="selected-routes">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Households</div>
+                    <div class="stat-value blue" id="total-hh">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Est. Daily kWh</div>
+                    <div class="stat-value orange" id="total-kwh">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Exp. Closes</div>
+                    <div class="stat-value purple" id="total-closes">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <div class="panel-tabs">
+                <div class="panel-tab active" onclick="switchTab('planner')">Weekly Plan</div>
+                <div class="panel-tab" onclick="switchTab('details')">Route Details</div>
+                <div class="panel-tab" onclick="switchTab('reps')">Rep Assign</div>
+            </div>
+
+            <div class="panel-content">
+                <!-- Weekly Planner -->
+                <div class="panel-section active" id="planner-section">
+                    <div class="week-header">
+                        <h3>Week of Jan 6, 2026</h3>
+                        <div class="week-nav">
+                            <button class="week-nav-btn" onclick="prevWeek()">←</button>
+                            <button class="week-nav-btn" onclick="nextWeek()">→</button>
+                        </div>
+                    </div>
+
+                    <div class="day-cards" id="day-cards">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Route Details -->
+                <div class="panel-section" id="details-section">
+                    <div class="route-details">
+                        <div class="route-details-header">
+                            <div>
+                                <div class="route-details-title" id="detail-title">Select a Route</div>
+                                <div style="color: var(--text-muted); font-size: 0.85rem;" id="detail-location">-</div>
+                            </div>
+                            <div class="route-details-badge fresh" id="detail-badge">FRESH</div>
+                        </div>
+
+                        <div class="route-details-grid">
+                            <div class="detail-item">
+                                <div class="detail-label">Households</div>
+                                <div class="detail-value" id="detail-hh">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Conversion Rate</div>
+                                <div class="detail-value" id="detail-conv">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Est. Closes</div>
+                                <div class="detail-value" id="detail-closes">-</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Daily kWh</div>
+                                <div class="detail-value" id="detail-kwh">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="progress-ring-container">
+                        <div class="progress-ring">
+                            <svg width="120" height="120">
+                                <circle class="progress-ring-bg" cx="60" cy="60" r="54"/>
+                                <circle class="progress-ring-fill" id="progress-fill" cx="60" cy="60" r="54"/>
+                            </svg>
+                            <div class="progress-ring-text">
+                                <div class="progress-ring-value" id="progress-value">95%</div>
+                                <div class="progress-ring-label">Freshness</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <div class="chart-title">Conversion by LMI Type</div>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="lmiChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rep Assignment -->
+                <div class="panel-section" id="reps-section">
+                    <div class="sidebar-title" style="margin-bottom: 1rem;">Top Performers</div>
+                    <div class="rep-list" id="rep-list">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <div class="action-buttons" style="margin-top: 1.5rem;">
+                        <button class="action-btn primary" onclick="assignSelectedRep()">
+                            Assign to Route
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize map
+        const map = L.map('map').setView([37.5, -77.5], 7);
+
+        // Base layers
+        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '&copy; Esri',
+            maxZoom: 19
+        });
+
+        const dark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap &copy; CARTO',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Data
+        let routesData = [];
+        let zonesData = null;
+        let zonesLayer = null;
+        let selectedRoutes = new Set();
+        let activeFilters = { fresh: true, moderate: false, saturated: false };
+        let selectedRegions = new Set();
+
+        // Regions data
+        const regions = [
+            { name: 'Arlington', routes: 146, fresh: 146 },
+            { name: 'Rural', routes: 283, fresh: 283 },
+            { name: 'Fairfax', routes: 98, fresh: 98 },
+            { name: 'Charlottesville', routes: 79, fresh: 79 },
+            { name: 'Manassas', routes: 67, fresh: 67 },
+            { name: 'Alexandria', routes: 61, fresh: 61 },
+            { name: 'Richmond', routes: 538, fresh: 0 },
+            { name: 'Norfolk', routes: 149, fresh: 0 },
+            { name: 'Virginia Beach', routes: 95, fresh: 0 },
+            { name: 'Portsmouth', routes: 58, fresh: 0 },
+        ];
+
+        // Reps data from Arcadia
+        const reps = [
+            { name: 'Jason Zehr', initials: 'JZ', conversion: 74, sales: 27 },
+            { name: 'Omar Amin', initials: 'OA', conversion: 60, sales: 30 },
+            { name: 'Dominic Shea', initials: 'DS', conversion: 59, sales: 46 },
+            { name: 'Devin Cargile', initials: 'DC', conversion: 58, sales: 50 },
+            { name: 'Hannah Boyer', initials: 'HB', conversion: 57, sales: 166 },
+            { name: 'Zaytije Mercer', initials: 'ZM', conversion: 55, sales: 49 },
+            { name: 'Lowell Moore', initials: 'LM', conversion: 55, sales: 210 },
+            { name: 'Xavier Perkins', initials: 'XP', conversion: 54, sales: 41 },
+            { name: 'McAllister Zander', initials: 'MZ', conversion: 51, sales: 469 },
+            { name: 'Derrick Greene Jr', initials: 'DG', conversion: 43, sales: 855 },
+        ];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadZones();
+            populateRegions();
+            populateReps();
+            populateWeekPlan();
+            initChart();
+        });
+
+        // Load zones
+        async function loadZones() {
+            try {
+                const response = await fetch('lmi_auto_qualify_zones.geojson');
+                zonesData = await response.json();
+                renderZones();
+            } catch (error) {
+                console.error('Error loading zones:', error);
+            }
+        }
+
+        // Render zones on map
+        function renderZones() {
+            if (zonesLayer) {
+                map.removeLayer(zonesLayer);
+            }
+
+            zonesLayer = L.geoJSON(zonesData, {
+                style: function(feature) {
+                    const pct = feature.properties.avg_pct_low_income || 0.5;
+                    let color = '#00ff88';
+                    let opacity = 0.4;
+
+                    // Color by priority/freshness
+                    if (pct >= 0.7) {
+                        color = '#00ff88';
+                        opacity = 0.5;
+                    } else if (pct >= 0.6) {
+                        color = '#00bfff';
+                        opacity = 0.4;
+                    } else {
+                        color = '#ffd93d';
+                        opacity = 0.35;
+                    }
+
+                    return {
+                        fillColor: color,
+                        fillOpacity: opacity,
+                        color: color,
+                        weight: 2,
+                        opacity: 0.8
+                    };
+                },
+                onEachFeature: function(feature, layer) {
+                    const props = feature.properties;
+                    layer.bindPopup(`
+                        <strong>Zone ${props.zone_id}</strong><br>
+                        LMI: ${(props.avg_pct_low_income * 100).toFixed(0)}%<br>
+                        Blocks: ${props.polygon_count}
+                    `);
+
+                    layer.on('click', function() {
+                        selectZone(props);
+                    });
+                }
+            }).addTo(map);
+
+            map.fitBounds(zonesLayer.getBounds());
+        }
+
+        // Select zone
+        function selectZone(props) {
+            document.getElementById('detail-title').textContent = `Zone ${props.zone_id}`;
+            document.getElementById('detail-location').textContent = `${props.polygon_count} census blocks`;
+            document.getElementById('detail-hh').textContent = (props.polygon_count * 500).toLocaleString();
+            document.getElementById('detail-conv').textContent = '40%';
+            document.getElementById('detail-closes').textContent = Math.round(props.polygon_count * 500 * 0.4 * 0.1);
+            document.getElementById('detail-kwh').textContent = `${Math.round(props.polygon_count * 500 * 0.4 * 0.1 * 9.6)}k`;
+
+            // Update progress ring
+            const freshness = 95;
+            updateProgressRing(freshness);
+
+            switchTab('details');
+        }
+
+        // Update progress ring
+        function updateProgressRing(percentage) {
+            const fill = document.getElementById('progress-fill');
+            const circumference = 339.292;
+            const offset = circumference - (percentage / 100) * circumference;
+            fill.style.strokeDashoffset = offset;
+            document.getElementById('progress-value').textContent = percentage + '%';
+        }
+
+        // Populate regions
+        function populateRegions() {
+            const container = document.getElementById('region-list');
+            container.innerHTML = regions.map(r => `
+                <div class="region-item ${selectedRegions.has(r.name) ? 'selected' : ''}"
+                     onclick="toggleRegion('${r.name}')">
+                    <div class="region-checkbox"></div>
+                    <span class="region-name">${r.name}</span>
+                    <span class="region-routes">${r.fresh > 0 ? r.fresh + ' fresh' : r.routes}</span>
+                </div>
+            `).join('');
+        }
+
+        // Toggle region
+        function toggleRegion(name) {
+            if (selectedRegions.has(name)) {
+                selectedRegions.delete(name);
+            } else {
+                selectedRegions.add(name);
+            }
+            populateRegions();
+            updateStats();
+        }
+
+        // Populate reps
+        function populateReps() {
+            const container = document.getElementById('rep-list');
+            container.innerHTML = reps.map(r => `
+                <div class="rep-card" onclick="selectRep('${r.name}')">
+                    <div class="rep-avatar">${r.initials}</div>
+                    <div class="rep-info">
+                        <div class="rep-name">${r.name}</div>
+                        <div class="rep-stats">${r.sales} sales</div>
+                    </div>
+                    <div class="rep-conversion">${r.conversion}%</div>
+                </div>
+            `).join('');
+        }
+
+        // Populate week plan
+        function populateWeekPlan() {
+            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+            const routes = [
+                { day: 'Monday', zone: 148, location: 'Arlington', hh: 150, kwh: 576, priority: 'fresh' },
+                { day: 'Tuesday', zone: 273, location: 'Ashland', hh: 150, kwh: 648, priority: 'fresh' },
+                { day: 'Wednesday', zone: 150, location: 'Manassas', hh: 150, kwh: 576, priority: 'fresh' },
+                { day: 'Thursday', zone: 66, location: 'Alexandria', hh: 150, kwh: 576, priority: 'fresh' },
+                { day: 'Friday', zone: 216, location: 'Herndon', hh: 150, kwh: 504, priority: 'fresh' },
+            ];
+
+            const container = document.getElementById('day-cards');
+            container.innerHTML = routes.map((r, i) => `
+                <div class="day-card ${i === 0 ? 'active' : ''}" onclick="selectDay(${i})">
+                    <div class="day-header">
+                        <span class="day-name">${r.day}</span>
+                        <span class="day-date">Jan ${6 + i}</span>
+                    </div>
+                    <div class="day-stats">
+                        <div class="day-stat">
+                            <div class="day-stat-value">${r.hh}</div>
+                            <div class="day-stat-label">Households</div>
+                        </div>
+                        <div class="day-stat">
+                            <div class="day-stat-value">${r.kwh}k</div>
+                            <div class="day-stat-label">kWh</div>
+                        </div>
+                        <div class="day-stat">
+                            <div class="day-stat-value">${Math.round(r.hh * 0.4 * 0.1)}</div>
+                            <div class="day-stat-label">Closes</div>
+                        </div>
+                    </div>
+                    <div class="day-route">
+                        <div class="route-info">
+                            <div class="route-priority ${r.priority}"></div>
+                            <span class="route-name">Zone ${r.zone} - ${r.location}</span>
+                        </div>
+                        <span class="route-kwh">${r.kwh}k kWh</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize chart
+        function initChart() {
+            const ctx = document.getElementById('lmiChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Medicaid', 'SNAP', 'LIHEAP', 'Medicare D-SNP', 'SSI', 'Other'],
+                    datasets: [{
+                        data: [38, 23, 18, 12, 5, 4],
+                        backgroundColor: [
+                            '#00ff88',
+                            '#00bfff',
+                            '#8b5cf6',
+                            '#ff9500',
+                            '#ff4757',
+                            '#6b6b7b'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#a0a0b0',
+                                font: { size: 11 },
+                                padding: 10
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Toggle priority filter
+        function togglePriority(type) {
+            activeFilters[type] = !activeFilters[type];
+            document.querySelector(`.priority-btn.${type}`).classList.toggle('active');
+            updateStats();
+        }
+
+        // Update conversion filter
+        function updateConvFilter(value) {
+            document.getElementById('conv-min').textContent = value + '%';
+        }
+
+        // Switch tab
+        function switchTab(tab) {
+            document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.panel-section').forEach(s => s.classList.remove('active'));
+
+            document.querySelector(`.panel-tab:nth-child(${tab === 'planner' ? 1 : tab === 'details' ? 2 : 3})`).classList.add('active');
+            document.getElementById(`${tab}-section`).classList.add('active');
+        }
+
+        // Set map view
+        function setMapView(view) {
+            document.querySelectorAll('.map-control-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Update stats
+        function updateStats() {
+            let routes = 0, hh = 0, kwh = 0, closes = 0;
+
+            if (activeFilters.fresh) {
+                routes += 791;
+                hh += 118650;
+                kwh += 587000;
+                closes += 4746;
+            }
+            if (activeFilters.moderate) {
+                routes += 320;
+                hh += 47970;
+                kwh += 662000;
+                closes += 1919;
+            }
+            if (activeFilters.saturated) {
+                routes += 388;
+                hh += 56189;
+                kwh += 557000;
+                closes += 2248;
+            }
+
+            document.getElementById('selected-routes').textContent = routes.toLocaleString();
+            document.getElementById('total-hh').textContent = hh.toLocaleString();
+            document.getElementById('total-kwh').textContent = (kwh / 1000).toFixed(0) + 'k';
+            document.getElementById('total-closes').textContent = closes.toLocaleString();
+        }
+
+        // Select day
+        function selectDay(index) {
+            document.querySelectorAll('.day-card').forEach((c, i) => {
+                c.classList.toggle('active', i === index);
+            });
+        }
+
+        // Auto assign routes
+        function autoAssignRoutes() {
+            alert('Auto-assigning top 5 fresh routes to your best performers for the week!');
+        }
+
+        // Export plan
+        function exportPlan() {
+            alert('Exporting weekly plan as CSV...');
+        }
+
+        // Select rep
+        function selectRep(name) {
+            document.querySelectorAll('.rep-card').forEach(c => c.classList.remove('assigned'));
+            event.currentTarget.classList.add('assigned');
+        }
+
+        // Assign selected rep
+        function assignSelectedRep() {
+            alert('Rep assigned to selected route!');
+        }
+
+        // Week navigation
+        function prevWeek() {
+            document.querySelector('.week-header h3').textContent = 'Week of Dec 30, 2025';
+        }
+
+        function nextWeek() {
+            document.querySelector('.week-header h3').textContent = 'Week of Jan 13, 2026';
+        }
+
+        // Initial stats
+        updateStats();
+        updateProgressRing(95);
+    </script>
+</body>
+</html>

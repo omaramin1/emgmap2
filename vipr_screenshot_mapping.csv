@@ -1,0 +1,18 @@
+screenshot,area_name,landmarks,zone_id,rank,score,priority,lmi_pct,saturation
+img_01,Norfolk/Geneva Mobile Home Park,"Geneva Mobile Home Park, Fairmont Heights, Powell Subdivision",30,96,57.7,GOOD,67%,20%
+img_02,Norfolk - Tidewater Dr,"Tidewater Dr, Little Creek",2,195,47.8,OK,74%,40%
+img_03,Virginia Beach - Kempsville,"Kempsville Rd, Princess Anne",7,167,50.5,OK,64%,35%
+img_04,Chesapeake,"Chesapeake, Great Bridge",2,195,47.8,OK,74%,40%
+img_05,Portsmouth - Naval Shipyard,"High St, London Blvd, Norfolk Naval Shipyard",2,195,47.8,OK,74%,40%
+img_06,Hampton - Phoebus,"Phoebus, Fort Monroe",3,192,47.9,OK,70%,25%
+img_07,Newport News - Downtown,Downtown Newport News,3,192,47.9,OK,70%,25%
+img_08,Newport News - Denbigh,"Denbigh, Warwick",10,171,49.8,OK,67%,25%
+img_09,Hampton - Coliseum,Hampton Coliseum area,3,192,47.9,OK,70%,25%
+img_10,Hampton - Two Oaks/Long Point,"Two Oaks Rd, Long Point Blvd, Dunkirk St",3,192,47.9,OK,70%,25%
+img_11,Richmond - Southside,Southside Richmond,1,201,47.5,OK,74%,35%
+img_12,Richmond - Church Hill,"Church Hill, Shockoe",1,201,47.5,OK,74%,35%
+img_13,Petersburg,"Petersburg, Colonial Heights",5,177,49.1,OK,72%,15%
+img_14,Fredericksburg,Fredericksburg downtown,14,185,48.5,OK,65%,15%
+img_15,Herndon/Sterling - NoVA,"Herndon Pkwy, Sterling Rd, Dulles Access",213,49,64.6,GOOD,76%,30%
+overview_01,Richmond - Innsbrook/Tuckahoe,"Innsbrook, W Broad St, Tuckahoe, Big Swamp",270,39,65.8,GOOD,70%,10%
+overview_02,Ashland Corridor,"Ashland, I-95 corridor",51,126,54.0,OK,62%,10%

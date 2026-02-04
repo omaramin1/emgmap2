@@ -1,0 +1,1163 @@
+{
+  "Accomack": {
+    "total_units": 21661,
+    "single_family_pct": 75.8,
+    "townhome_pct": 3.3,
+    "apartment_pct": 4.2,
+    "mobile_home_pct": 16.7,
+    "electric_heat_pct": 59.7,
+    "rooftop_eligible_pct": 95.7
+  },
+  "Albemarle": {
+    "total_units": 46661,
+    "single_family_pct": 59.5,
+    "townhome_pct": 13.9,
+    "apartment_pct": 23.5,
+    "mobile_home_pct": 3.0,
+    "electric_heat_pct": 65.4,
+    "rooftop_eligible_pct": 76.4
+  },
+  "Alleghany": {
+    "total_units": 7948,
+    "single_family_pct": 77.3,
+    "townhome_pct": 0.4,
+    "apartment_pct": 9.6,
+    "mobile_home_pct": 12.7,
+    "electric_heat_pct": 64.9,
+    "rooftop_eligible_pct": 90.4
+  },
+  "Amelia": {
+    "total_units": 5675,
+    "single_family_pct": 72.4,
+    "townhome_pct": 0.2,
+    "apartment_pct": 1.5,
+    "mobile_home_pct": 25.8,
+    "electric_heat_pct": 68.1,
+    "rooftop_eligible_pct": 98.5
+  },
+  "Amherst": {
+    "total_units": 14229,
+    "single_family_pct": 77.5,
+    "townhome_pct": 2.0,
+    "apartment_pct": 8.5,
+    "mobile_home_pct": 11.9,
+    "electric_heat_pct": 83.1,
+    "rooftop_eligible_pct": 91.4
+  },
+  "Appomattox": {
+    "total_units": 7261,
+    "single_family_pct": 78.2,
+    "townhome_pct": 0.9,
+    "apartment_pct": 4.0,
+    "mobile_home_pct": 16.8,
+    "electric_heat_pct": 75.6,
+    "rooftop_eligible_pct": 95.9
+  },
+  "Arlington": {
+    "total_units": 117546,
+    "single_family_pct": 25.3,
+    "townhome_pct": 9.4,
+    "apartment_pct": 65.2,
+    "mobile_home_pct": 0.1,
+    "electric_heat_pct": 48.0,
+    "rooftop_eligible_pct": 34.8
+  },
+  "Augusta": {
+    "total_units": 32502,
+    "single_family_pct": 79.8,
+    "townhome_pct": 2.9,
+    "apartment_pct": 7.8,
+    "mobile_home_pct": 9.5,
+    "electric_heat_pct": 49.4,
+    "rooftop_eligible_pct": 92.2
+  },
+  "Bath": {
+    "total_units": 3349,
+    "single_family_pct": 83.9,
+    "townhome_pct": 2.4,
+    "apartment_pct": 3.6,
+    "mobile_home_pct": 10.1,
+    "electric_heat_pct": 52.1,
+    "rooftop_eligible_pct": 96.4
+  },
+  "Bedford": {
+    "total_units": 37207,
+    "single_family_pct": 76.6,
+    "townhome_pct": 3.7,
+    "apartment_pct": 7.9,
+    "mobile_home_pct": 11.7,
+    "electric_heat_pct": 80.6,
+    "rooftop_eligible_pct": 92.0
+  },
+  "Bland": {
+    "total_units": 3204,
+    "single_family_pct": 69.4,
+    "townhome_pct": 0.8,
+    "apartment_pct": 2.9,
+    "mobile_home_pct": 26.9,
+    "electric_heat_pct": 75.5,
+    "rooftop_eligible_pct": 97.1
+  },
+  "Botetourt": {
+    "total_units": 14867,
+    "single_family_pct": 84.2,
+    "townhome_pct": 2.1,
+    "apartment_pct": 4.7,
+    "mobile_home_pct": 8.9,
+    "electric_heat_pct": 64.0,
+    "rooftop_eligible_pct": 95.3
+  },
+  "Brunswick": {
+    "total_units": 7944,
+    "single_family_pct": 67.2,
+    "townhome_pct": 1.0,
+    "apartment_pct": 3.7,
+    "mobile_home_pct": 28.2,
+    "electric_heat_pct": 66.1,
+    "rooftop_eligible_pct": 96.3
+  },
+  "Buchanan": {
+    "total_units": 10475,
+    "single_family_pct": 63.8,
+    "townhome_pct": 0.9,
+    "apartment_pct": 4.4,
+    "mobile_home_pct": 30.9,
+    "electric_heat_pct": 85.3,
+    "rooftop_eligible_pct": 95.6
+  },
+  "Buckingham": {
+    "total_units": 7178,
+    "single_family_pct": 68.0,
+    "townhome_pct": 0.4,
+    "apartment_pct": 1.9,
+    "mobile_home_pct": 29.5,
+    "electric_heat_pct": 69.4,
+    "rooftop_eligible_pct": 97.9
+  },
+  "Campbell": {
+    "total_units": 25159,
+    "single_family_pct": 67.3,
+    "townhome_pct": 2.8,
+    "apartment_pct": 11.6,
+    "mobile_home_pct": 18.2,
+    "electric_heat_pct": 80.7,
+    "rooftop_eligible_pct": 88.4
+  },
+  "Caroline": {
+    "total_units": 12373,
+    "single_family_pct": 83.3,
+    "townhome_pct": 5.9,
+    "apartment_pct": 2.2,
+    "mobile_home_pct": 8.5,
+    "electric_heat_pct": 74.0,
+    "rooftop_eligible_pct": 97.7
+  },
+  "Carroll": {
+    "total_units": 16616,
+    "single_family_pct": 75.4,
+    "townhome_pct": 0.3,
+    "apartment_pct": 3.3,
+    "mobile_home_pct": 21.1,
+    "electric_heat_pct": 67.6,
+    "rooftop_eligible_pct": 96.7
+  },
+  "Charles City": {
+    "total_units": 3261,
+    "single_family_pct": 83.3,
+    "townhome_pct": 0.5,
+    "apartment_pct": 3.0,
+    "mobile_home_pct": 13.2,
+    "electric_heat_pct": 79.8,
+    "rooftop_eligible_pct": 97.0
+  },
+  "Charlotte": {
+    "total_units": 6003,
+    "single_family_pct": 70.4,
+    "townhome_pct": 0.4,
+    "apartment_pct": 4.9,
+    "mobile_home_pct": 24.1,
+    "electric_heat_pct": 53.5,
+    "rooftop_eligible_pct": 94.9
+  },
+  "Chesterfield": {
+    "total_units": 136775,
+    "single_family_pct": 78.6,
+    "townhome_pct": 4.8,
+    "apartment_pct": 15.3,
+    "mobile_home_pct": 1.3,
+    "electric_heat_pct": 66.2,
+    "rooftop_eligible_pct": 84.7
+  },
+  "Clarke": {
+    "total_units": 6341,
+    "single_family_pct": 89.7,
+    "townhome_pct": 3.9,
+    "apartment_pct": 6.0,
+    "mobile_home_pct": 0.4,
+    "electric_heat_pct": 53.0,
+    "rooftop_eligible_pct": 94.0
+  },
+  "Craig": {
+    "total_units": 2623,
+    "single_family_pct": 80.9,
+    "townhome_pct": 0.0,
+    "apartment_pct": 4.5,
+    "mobile_home_pct": 14.7,
+    "electric_heat_pct": 64.6,
+    "rooftop_eligible_pct": 95.5
+  },
+  "Culpeper": {
+    "total_units": 19020,
+    "single_family_pct": 79.9,
+    "townhome_pct": 7.6,
+    "apartment_pct": 10.1,
+    "mobile_home_pct": 2.3,
+    "electric_heat_pct": 44.8,
+    "rooftop_eligible_pct": 89.8
+  },
+  "Cumberland": {
+    "total_units": 4638,
+    "single_family_pct": 73.4,
+    "townhome_pct": 1.4,
+    "apartment_pct": 4.0,
+    "mobile_home_pct": 21.2,
+    "electric_heat_pct": 63.1,
+    "rooftop_eligible_pct": 96.0
+  },
+  "Dickenson": {
+    "total_units": 7382,
+    "single_family_pct": 67.4,
+    "townhome_pct": 0.3,
+    "apartment_pct": 3.5,
+    "mobile_home_pct": 28.5,
+    "electric_heat_pct": 84.7,
+    "rooftop_eligible_pct": 96.3
+  },
+  "Dinwiddie": {
+    "total_units": 11775,
+    "single_family_pct": 82.3,
+    "townhome_pct": 0.1,
+    "apartment_pct": 4.6,
+    "mobile_home_pct": 13.1,
+    "electric_heat_pct": 71.3,
+    "rooftop_eligible_pct": 95.4
+  },
+  "Essex": {
+    "total_units": 5744,
+    "single_family_pct": 76.2,
+    "townhome_pct": 1.8,
+    "apartment_pct": 9.9,
+    "mobile_home_pct": 12.1,
+    "electric_heat_pct": 77.3,
+    "rooftop_eligible_pct": 90.1
+  },
+  "Fairfax": {
+    "total_units": 9294,
+    "single_family_pct": 56.3,
+    "townhome_pct": 17.3,
+    "apartment_pct": 26.4,
+    "mobile_home_pct": 0.0,
+    "electric_heat_pct": 32.7,
+    "rooftop_eligible_pct": 73.6
+  },
+  "Fauquier": {
+    "total_units": 27966,
+    "single_family_pct": 84.3,
+    "townhome_pct": 5.8,
+    "apartment_pct": 7.9,
+    "mobile_home_pct": 2.0,
+    "electric_heat_pct": 50.6,
+    "rooftop_eligible_pct": 92.1
+  },
+  "Floyd": {
+    "total_units": 7933,
+    "single_family_pct": 77.1,
+    "townhome_pct": 0.6,
+    "apartment_pct": 2.1,
+    "mobile_home_pct": 20.1,
+    "electric_heat_pct": 61.9,
+    "rooftop_eligible_pct": 97.9
+  },
+  "Fluvanna": {
+    "total_units": 11061,
+    "single_family_pct": 89.1,
+    "townhome_pct": 1.6,
+    "apartment_pct": 3.4,
+    "mobile_home_pct": 5.9,
+    "electric_heat_pct": 74.7,
+    "rooftop_eligible_pct": 96.6
+  },
+  "Franklin": {
+    "total_units": 3878,
+    "single_family_pct": 67.0,
+    "townhome_pct": 2.7,
+    "apartment_pct": 29.2,
+    "mobile_home_pct": 1.1,
+    "electric_heat_pct": 85.0,
+    "rooftop_eligible_pct": 70.8
+  },
+  "Frederick": {
+    "total_units": 35335,
+    "single_family_pct": 74.6,
+    "townhome_pct": 9.8,
+    "apartment_pct": 9.6,
+    "mobile_home_pct": 6.0,
+    "electric_heat_pct": 51.1,
+    "rooftop_eligible_pct": 90.3
+  },
+  "Giles": {
+    "total_units": 8312,
+    "single_family_pct": 73.4,
+    "townhome_pct": 1.0,
+    "apartment_pct": 7.3,
+    "mobile_home_pct": 18.4,
+    "electric_heat_pct": 75.6,
+    "rooftop_eligible_pct": 92.7
+  },
+  "Gloucester": {
+    "total_units": 16952,
+    "single_family_pct": 81.8,
+    "townhome_pct": 2.2,
+    "apartment_pct": 6.5,
+    "mobile_home_pct": 9.3,
+    "electric_heat_pct": 78.8,
+    "rooftop_eligible_pct": 93.3
+  },
+  "Goochland": {
+    "total_units": 10321,
+    "single_family_pct": 88.5,
+    "townhome_pct": 0.7,
+    "apartment_pct": 6.2,
+    "mobile_home_pct": 4.6,
+    "electric_heat_pct": 76.6,
+    "rooftop_eligible_pct": 93.8
+  },
+  "Grayson": {
+    "total_units": 8956,
+    "single_family_pct": 78.0,
+    "townhome_pct": 0.8,
+    "apartment_pct": 3.6,
+    "mobile_home_pct": 17.7,
+    "electric_heat_pct": 52.5,
+    "rooftop_eligible_pct": 96.4
+  },
+  "Greene": {
+    "total_units": 8420,
+    "single_family_pct": 80.7,
+    "townhome_pct": 2.8,
+    "apartment_pct": 6.1,
+    "mobile_home_pct": 10.4,
+    "electric_heat_pct": 73.6,
+    "rooftop_eligible_pct": 93.9
+  },
+  "Greensville": {
+    "total_units": 4029,
+    "single_family_pct": 80.3,
+    "townhome_pct": 0.6,
+    "apartment_pct": 2.8,
+    "mobile_home_pct": 16.4,
+    "electric_heat_pct": 66.7,
+    "rooftop_eligible_pct": 97.2
+  },
+  "Halifax": {
+    "total_units": 17387,
+    "single_family_pct": 74.5,
+    "townhome_pct": 1.3,
+    "apartment_pct": 5.5,
+    "mobile_home_pct": 18.7,
+    "electric_heat_pct": 64.0,
+    "rooftop_eligible_pct": 94.5
+  },
+  "Hanover": {
+    "total_units": 42692,
+    "single_family_pct": 85.7,
+    "townhome_pct": 4.5,
+    "apartment_pct": 7.9,
+    "mobile_home_pct": 2.0,
+    "electric_heat_pct": 68.6,
+    "rooftop_eligible_pct": 92.1
+  },
+  "Henrico": {
+    "total_units": 139826,
+    "single_family_pct": 65.5,
+    "townhome_pct": 10.7,
+    "apartment_pct": 23.5,
+    "mobile_home_pct": 0.3,
+    "electric_heat_pct": 58.9,
+    "rooftop_eligible_pct": 76.5
+  },
+  "Henry": {
+    "total_units": 25545,
+    "single_family_pct": 69.0,
+    "townhome_pct": 0.7,
+    "apartment_pct": 9.8,
+    "mobile_home_pct": 20.5,
+    "electric_heat_pct": 75.3,
+    "rooftop_eligible_pct": 90.2
+  },
+  "Highland": {
+    "total_units": 1800,
+    "single_family_pct": 81.7,
+    "townhome_pct": 1.9,
+    "apartment_pct": 3.6,
+    "mobile_home_pct": 12.9,
+    "electric_heat_pct": 42.8,
+    "rooftop_eligible_pct": 96.4
+  },
+  "Isle of Wight": {
+    "total_units": 16304,
+    "single_family_pct": 78.6,
+    "townhome_pct": 3.2,
+    "apartment_pct": 8.9,
+    "mobile_home_pct": 9.2,
+    "electric_heat_pct": 61.2,
+    "rooftop_eligible_pct": 91.0
+  },
+  "James City": {
+    "total_units": 33771,
+    "single_family_pct": 65.0,
+    "townhome_pct": 12.7,
+    "apartment_pct": 19.0,
+    "mobile_home_pct": 3.3,
+    "electric_heat_pct": 48.2,
+    "rooftop_eligible_pct": 81.0
+  },
+  "King and Queen": {
+    "total_units": 3452,
+    "single_family_pct": 81.4,
+    "townhome_pct": 0.8,
+    "apartment_pct": 0.6,
+    "mobile_home_pct": 17.2,
+    "electric_heat_pct": 77.3,
+    "rooftop_eligible_pct": 99.4
+  },
+  "King George": {
+    "total_units": 10248,
+    "single_family_pct": 83.6,
+    "townhome_pct": 4.5,
+    "apartment_pct": 6.7,
+    "mobile_home_pct": 5.2,
+    "electric_heat_pct": 78.9,
+    "rooftop_eligible_pct": 93.3
+  },
+  "King William": {
+    "total_units": 7304,
+    "single_family_pct": 91.2,
+    "townhome_pct": 2.4,
+    "apartment_pct": 2.5,
+    "mobile_home_pct": 3.7,
+    "electric_heat_pct": 83.2,
+    "rooftop_eligible_pct": 97.4
+  },
+  "Lancaster": {
+    "total_units": 7454,
+    "single_family_pct": 84.5,
+    "townhome_pct": 2.8,
+    "apartment_pct": 7.8,
+    "mobile_home_pct": 4.9,
+    "electric_heat_pct": 69.7,
+    "rooftop_eligible_pct": 92.2
+  },
+  "Lee": {
+    "total_units": 10947,
+    "single_family_pct": 72.3,
+    "townhome_pct": 0.4,
+    "apartment_pct": 7.3,
+    "mobile_home_pct": 20.0,
+    "electric_heat_pct": 80.0,
+    "rooftop_eligible_pct": 92.7
+  },
+  "Loudoun": {
+    "total_units": 139439,
+    "single_family_pct": 52.7,
+    "townhome_pct": 29.9,
+    "apartment_pct": 16.9,
+    "mobile_home_pct": 0.4,
+    "electric_heat_pct": 31.3,
+    "rooftop_eligible_pct": 83.0
+  },
+  "Louisa": {
+    "total_units": 17409,
+    "single_family_pct": 84.9,
+    "townhome_pct": 1.4,
+    "apartment_pct": 4.5,
+    "mobile_home_pct": 9.3,
+    "electric_heat_pct": 68.8,
+    "rooftop_eligible_pct": 95.5
+  },
+  "Lunenburg": {
+    "total_units": 5880,
+    "single_family_pct": 73.7,
+    "townhome_pct": 0.3,
+    "apartment_pct": 2.8,
+    "mobile_home_pct": 23.1,
+    "electric_heat_pct": 49.8,
+    "rooftop_eligible_pct": 97.2
+  },
+  "Madison": {
+    "total_units": 6036,
+    "single_family_pct": 93.1,
+    "townhome_pct": 1.1,
+    "apartment_pct": 1.9,
+    "mobile_home_pct": 4.0,
+    "electric_heat_pct": 50.4,
+    "rooftop_eligible_pct": 98.1
+  },
+  "Mathews": {
+    "total_units": 5502,
+    "single_family_pct": 87.5,
+    "townhome_pct": 0.5,
+    "apartment_pct": 3.2,
+    "mobile_home_pct": 8.8,
+    "electric_heat_pct": 73.6,
+    "rooftop_eligible_pct": 96.8
+  },
+  "Mecklenburg": {
+    "total_units": 19003,
+    "single_family_pct": 71.0,
+    "townhome_pct": 1.1,
+    "apartment_pct": 7.0,
+    "mobile_home_pct": 20.7,
+    "electric_heat_pct": 63.7,
+    "rooftop_eligible_pct": 92.9
+  },
+  "Middlesex": {
+    "total_units": 7125,
+    "single_family_pct": 81.7,
+    "townhome_pct": 2.2,
+    "apartment_pct": 4.8,
+    "mobile_home_pct": 11.3,
+    "electric_heat_pct": 71.1,
+    "rooftop_eligible_pct": 95.2
+  },
+  "Montgomery": {
+    "total_units": 41085,
+    "single_family_pct": 52.7,
+    "townhome_pct": 6.3,
+    "apartment_pct": 30.0,
+    "mobile_home_pct": 11.0,
+    "electric_heat_pct": 75.2,
+    "rooftop_eligible_pct": 70.0
+  },
+  "Nelson": {
+    "total_units": 9902,
+    "single_family_pct": 72.7,
+    "townhome_pct": 2.6,
+    "apartment_pct": 13.3,
+    "mobile_home_pct": 11.4,
+    "electric_heat_pct": 65.5,
+    "rooftop_eligible_pct": 86.7
+  },
+  "New Kent": {
+    "total_units": 8919,
+    "single_family_pct": 94.5,
+    "townhome_pct": 1.4,
+    "apartment_pct": 0.6,
+    "mobile_home_pct": 3.6,
+    "electric_heat_pct": 78.1,
+    "rooftop_eligible_pct": 99.4
+  },
+  "Northampton": {
+    "total_units": 7364,
+    "single_family_pct": 80.5,
+    "townhome_pct": 2.6,
+    "apartment_pct": 6.6,
+    "mobile_home_pct": 10.3,
+    "electric_heat_pct": 62.1,
+    "rooftop_eligible_pct": 93.4
+  },
+  "Northumberland": {
+    "total_units": 8986,
+    "single_family_pct": 87.1,
+    "townhome_pct": 1.4,
+    "apartment_pct": 1.9,
+    "mobile_home_pct": 9.4,
+    "electric_heat_pct": 66.8,
+    "rooftop_eligible_pct": 97.9
+  },
+  "Nottoway": {
+    "total_units": 6639,
+    "single_family_pct": 78.1,
+    "townhome_pct": 1.6,
+    "apartment_pct": 8.4,
+    "mobile_home_pct": 11.9,
+    "electric_heat_pct": 58.1,
+    "rooftop_eligible_pct": 91.6
+  },
+  "Orange": {
+    "total_units": 15529,
+    "single_family_pct": 82.6,
+    "townhome_pct": 2.5,
+    "apartment_pct": 9.0,
+    "mobile_home_pct": 6.0,
+    "electric_heat_pct": 69.5,
+    "rooftop_eligible_pct": 91.0
+  },
+  "Page": {
+    "total_units": 11750,
+    "single_family_pct": 83.7,
+    "townhome_pct": 2.0,
+    "apartment_pct": 4.8,
+    "mobile_home_pct": 9.5,
+    "electric_heat_pct": 52.4,
+    "rooftop_eligible_pct": 95.2
+  },
+  "Patrick": {
+    "total_units": 10014,
+    "single_family_pct": 70.2,
+    "townhome_pct": 0.9,
+    "apartment_pct": 3.9,
+    "mobile_home_pct": 24.1,
+    "electric_heat_pct": 63.2,
+    "rooftop_eligible_pct": 95.3
+  },
+  "Pittsylvania": {
+    "total_units": 29656,
+    "single_family_pct": 76.1,
+    "townhome_pct": 0.6,
+    "apartment_pct": 3.7,
+    "mobile_home_pct": 19.5,
+    "electric_heat_pct": 67.2,
+    "rooftop_eligible_pct": 96.2
+  },
+  "Powhatan": {
+    "total_units": 11415,
+    "single_family_pct": 94.5,
+    "townhome_pct": 2.3,
+    "apartment_pct": 1.0,
+    "mobile_home_pct": 2.2,
+    "electric_heat_pct": 81.1,
+    "rooftop_eligible_pct": 99.0
+  },
+  "Prince Edward": {
+    "total_units": 9119,
+    "single_family_pct": 66.1,
+    "townhome_pct": 1.3,
+    "apartment_pct": 16.8,
+    "mobile_home_pct": 15.8,
+    "electric_heat_pct": 74.2,
+    "rooftop_eligible_pct": 83.2
+  },
+  "Prince George": {
+    "total_units": 13239,
+    "single_family_pct": 76.0,
+    "townhome_pct": 11.1,
+    "apartment_pct": 8.2,
+    "mobile_home_pct": 4.7,
+    "electric_heat_pct": 76.0,
+    "rooftop_eligible_pct": 91.8
+  },
+  "Prince William": {
+    "total_units": 156845,
+    "single_family_pct": 55.0,
+    "townhome_pct": 26.3,
+    "apartment_pct": 17.7,
+    "mobile_home_pct": 1.0,
+    "electric_heat_pct": 39.9,
+    "rooftop_eligible_pct": 82.3
+  },
+  "Pulaski": {
+    "total_units": 17016,
+    "single_family_pct": 72.5,
+    "townhome_pct": 2.8,
+    "apartment_pct": 14.0,
+    "mobile_home_pct": 10.7,
+    "electric_heat_pct": 70.6,
+    "rooftop_eligible_pct": 86.0
+  },
+  "Rappahannock": {
+    "total_units": 3843,
+    "single_family_pct": 95.7,
+    "townhome_pct": 1.0,
+    "apartment_pct": 2.6,
+    "mobile_home_pct": 0.7,
+    "electric_heat_pct": 46.1,
+    "rooftop_eligible_pct": 97.4
+  },
+  "Richmond": {
+    "total_units": 110224,
+    "single_family_pct": 46.9,
+    "townhome_pct": 7.1,
+    "apartment_pct": 45.4,
+    "mobile_home_pct": 0.6,
+    "electric_heat_pct": 57.2,
+    "rooftop_eligible_pct": 54.6
+  },
+  "Roanoke": {
+    "total_units": 48537,
+    "single_family_pct": 61.7,
+    "townhome_pct": 4.9,
+    "apartment_pct": 32.8,
+    "mobile_home_pct": 0.6,
+    "electric_heat_pct": 45.6,
+    "rooftop_eligible_pct": 67.2
+  },
+  "Rockbridge": {
+    "total_units": 11261,
+    "single_family_pct": 77.4,
+    "townhome_pct": 2.4,
+    "apartment_pct": 7.7,
+    "mobile_home_pct": 12.5,
+    "electric_heat_pct": 52.8,
+    "rooftop_eligible_pct": 92.3
+  },
+  "Rockingham": {
+    "total_units": 35388,
+    "single_family_pct": 72.2,
+    "townhome_pct": 9.8,
+    "apartment_pct": 9.5,
+    "mobile_home_pct": 8.5,
+    "electric_heat_pct": 63.0,
+    "rooftop_eligible_pct": 90.5
+  },
+  "Russell": {
+    "total_units": 12857,
+    "single_family_pct": 69.5,
+    "townhome_pct": 1.6,
+    "apartment_pct": 6.8,
+    "mobile_home_pct": 22.1,
+    "electric_heat_pct": 84.5,
+    "rooftop_eligible_pct": 93.2
+  },
+  "Scott": {
+    "total_units": 11790,
+    "single_family_pct": 74.1,
+    "townhome_pct": 2.0,
+    "apartment_pct": 3.7,
+    "mobile_home_pct": 20.2,
+    "electric_heat_pct": 85.9,
+    "rooftop_eligible_pct": 96.3
+  },
+  "Shenandoah": {
+    "total_units": 21114,
+    "single_family_pct": 76.5,
+    "townhome_pct": 8.0,
+    "apartment_pct": 11.6,
+    "mobile_home_pct": 3.9,
+    "electric_heat_pct": 57.6,
+    "rooftop_eligible_pct": 88.4
+  },
+  "Smyth": {
+    "total_units": 15148,
+    "single_family_pct": 71.2,
+    "townhome_pct": 0.8,
+    "apartment_pct": 10.1,
+    "mobile_home_pct": 17.8,
+    "electric_heat_pct": 68.2,
+    "rooftop_eligible_pct": 89.8
+  },
+  "Southampton": {
+    "total_units": 7703,
+    "single_family_pct": 78.6,
+    "townhome_pct": 0.5,
+    "apartment_pct": 4.3,
+    "mobile_home_pct": 16.6,
+    "electric_heat_pct": 70.3,
+    "rooftop_eligible_pct": 95.7
+  },
+  "Spotsylvania": {
+    "total_units": 51085,
+    "single_family_pct": 77.9,
+    "townhome_pct": 9.0,
+    "apartment_pct": 9.5,
+    "mobile_home_pct": 3.5,
+    "electric_heat_pct": 57.4,
+    "rooftop_eligible_pct": 90.4
+  },
+  "Stafford": {
+    "total_units": 51947,
+    "single_family_pct": 74.2,
+    "townhome_pct": 13.8,
+    "apartment_pct": 9.6,
+    "mobile_home_pct": 2.3,
+    "electric_heat_pct": 55.5,
+    "rooftop_eligible_pct": 90.3
+  },
+  "Surry": {
+    "total_units": 3410,
+    "single_family_pct": 82.2,
+    "townhome_pct": 0.6,
+    "apartment_pct": 4.5,
+    "mobile_home_pct": 12.6,
+    "electric_heat_pct": 60.6,
+    "rooftop_eligible_pct": 95.5
+  },
+  "Sussex": {
+    "total_units": 4645,
+    "single_family_pct": 72.0,
+    "townhome_pct": 0.8,
+    "apartment_pct": 6.9,
+    "mobile_home_pct": 20.2,
+    "electric_heat_pct": 71.5,
+    "rooftop_eligible_pct": 93.1
+  },
+  "Tazewell": {
+    "total_units": 19946,
+    "single_family_pct": 68.2,
+    "townhome_pct": 0.8,
+    "apartment_pct": 8.5,
+    "mobile_home_pct": 22.5,
+    "electric_heat_pct": 75.1,
+    "rooftop_eligible_pct": 91.5
+  },
+  "Warren": {
+    "total_units": 16656,
+    "single_family_pct": 83.7,
+    "townhome_pct": 5.5,
+    "apartment_pct": 9.4,
+    "mobile_home_pct": 1.5,
+    "electric_heat_pct": 66.0,
+    "rooftop_eligible_pct": 90.6
+  },
+  "Washington": {
+    "total_units": 25490,
+    "single_family_pct": 70.8,
+    "townhome_pct": 3.2,
+    "apartment_pct": 11.2,
+    "mobile_home_pct": 14.8,
+    "electric_heat_pct": 80.1,
+    "rooftop_eligible_pct": 88.8
+  },
+  "Westmoreland": {
+    "total_units": 11080,
+    "single_family_pct": 85.4,
+    "townhome_pct": 1.5,
+    "apartment_pct": 3.8,
+    "mobile_home_pct": 8.6,
+    "electric_heat_pct": 77.4,
+    "rooftop_eligible_pct": 95.5
+  },
+  "Wise": {
+    "total_units": 16820,
+    "single_family_pct": 64.0,
+    "townhome_pct": 0.3,
+    "apartment_pct": 9.4,
+    "mobile_home_pct": 26.4,
+    "electric_heat_pct": 87.2,
+    "rooftop_eligible_pct": 90.6
+  },
+  "Wythe": {
+    "total_units": 14033,
+    "single_family_pct": 68.8,
+    "townhome_pct": 1.9,
+    "apartment_pct": 9.0,
+    "mobile_home_pct": 20.3,
+    "electric_heat_pct": 67.4,
+    "rooftop_eligible_pct": 91.0
+  },
+  "York": {
+    "total_units": 27633,
+    "single_family_pct": 65.7,
+    "townhome_pct": 13.8,
+    "apartment_pct": 19.3,
+    "mobile_home_pct": 1.2,
+    "electric_heat_pct": 44.6,
+    "rooftop_eligible_pct": 80.7
+  },
+  "Alexandria": {
+    "total_units": 80040,
+    "single_family_pct": 14.0,
+    "townhome_pct": 21.1,
+    "apartment_pct": 64.9,
+    "mobile_home_pct": 0.0,
+    "electric_heat_pct": 47.9,
+    "rooftop_eligible_pct": 35.1
+  },
+  "Bristol": {
+    "total_units": 8692,
+    "single_family_pct": 68.2,
+    "townhome_pct": 5.8,
+    "apartment_pct": 24.5,
+    "mobile_home_pct": 1.4,
+    "electric_heat_pct": 76.5,
+    "rooftop_eligible_pct": 75.5
+  },
+  "Buena Vista": {
+    "total_units": 2941,
+    "single_family_pct": 82.7,
+    "townhome_pct": 2.8,
+    "apartment_pct": 11.7,
+    "mobile_home_pct": 2.8,
+    "electric_heat_pct": 53.9,
+    "rooftop_eligible_pct": 88.3
+  },
+  "Charlottesville": {
+    "total_units": 21285,
+    "single_family_pct": 46.0,
+    "townhome_pct": 8.3,
+    "apartment_pct": 44.8,
+    "mobile_home_pct": 0.9,
+    "electric_heat_pct": 53.6,
+    "rooftop_eligible_pct": 55.2
+  },
+  "Chesapeake": {
+    "total_units": 94035,
+    "single_family_pct": 67.9,
+    "townhome_pct": 12.2,
+    "apartment_pct": 18.2,
+    "mobile_home_pct": 1.7,
+    "electric_heat_pct": 52.5,
+    "rooftop_eligible_pct": 81.8
+  },
+  "Colonial Heights": {
+    "total_units": 8107,
+    "single_family_pct": 78.5,
+    "townhome_pct": 4.3,
+    "apartment_pct": 16.7,
+    "mobile_home_pct": 0.4,
+    "electric_heat_pct": 57.8,
+    "rooftop_eligible_pct": 83.2
+  },
+  "Covington": {
+    "total_units": 3046,
+    "single_family_pct": 87.7,
+    "townhome_pct": 0.5,
+    "apartment_pct": 5.9,
+    "mobile_home_pct": 4.5,
+    "electric_heat_pct": 49.6,
+    "rooftop_eligible_pct": 92.7
+  },
+  "Danville": {
+    "total_units": 22264,
+    "single_family_pct": 69.8,
+    "townhome_pct": 1.4,
+    "apartment_pct": 25.1,
+    "mobile_home_pct": 3.7,
+    "electric_heat_pct": 54.9,
+    "rooftop_eligible_pct": 74.9
+  },
+  "Emporia": {
+    "total_units": 2794,
+    "single_family_pct": 73.9,
+    "townhome_pct": 0.0,
+    "apartment_pct": 23.1,
+    "mobile_home_pct": 2.9,
+    "electric_heat_pct": 78.2,
+    "rooftop_eligible_pct": 76.9
+  },
+  "Falls Church": {
+    "total_units": 6069,
+    "single_family_pct": 40.0,
+    "townhome_pct": 10.9,
+    "apartment_pct": 49.1,
+    "mobile_home_pct": 0.0,
+    "electric_heat_pct": 39.4,
+    "rooftop_eligible_pct": 50.9
+  },
+  "Fredericksburg": {
+    "total_units": 11961,
+    "single_family_pct": 39.8,
+    "townhome_pct": 13.4,
+    "apartment_pct": 46.5,
+    "mobile_home_pct": 0.3,
+    "electric_heat_pct": 56.2,
+    "rooftop_eligible_pct": 53.5
+  },
+  "Galax": {
+    "total_units": 3255,
+    "single_family_pct": 74.9,
+    "townhome_pct": 1.2,
+    "apartment_pct": 15.7,
+    "mobile_home_pct": 8.2,
+    "electric_heat_pct": 67.5,
+    "rooftop_eligible_pct": 84.3
+  },
+  "Hampton": {
+    "total_units": 62183,
+    "single_family_pct": 63.5,
+    "townhome_pct": 6.8,
+    "apartment_pct": 28.0,
+    "mobile_home_pct": 1.7,
+    "electric_heat_pct": 51.8,
+    "rooftop_eligible_pct": 72.0
+  },
+  "Harrisonburg": {
+    "total_units": 18569,
+    "single_family_pct": 35.3,
+    "townhome_pct": 21.6,
+    "apartment_pct": 41.9,
+    "mobile_home_pct": 1.2,
+    "electric_heat_pct": 74.5,
+    "rooftop_eligible_pct": 58.1
+  },
+  "Hopewell": {
+    "total_units": 10395,
+    "single_family_pct": 69.6,
+    "townhome_pct": 4.9,
+    "apartment_pct": 24.2,
+    "mobile_home_pct": 1.3,
+    "electric_heat_pct": 71.6,
+    "rooftop_eligible_pct": 75.8
+  },
+  "Lexington": {
+    "total_units": 2377,
+    "single_family_pct": 68.8,
+    "townhome_pct": 4.0,
+    "apartment_pct": 26.8,
+    "mobile_home_pct": 0.5,
+    "electric_heat_pct": 32.3,
+    "rooftop_eligible_pct": 73.2
+  },
+  "Lynchburg": {
+    "total_units": 33637,
+    "single_family_pct": 57.5,
+    "townhome_pct": 7.1,
+    "apartment_pct": 34.5,
+    "mobile_home_pct": 0.9,
+    "electric_heat_pct": 73.0,
+    "rooftop_eligible_pct": 65.5
+  },
+  "Manassas": {
+    "total_units": 14234,
+    "single_family_pct": 45.7,
+    "townhome_pct": 31.6,
+    "apartment_pct": 21.6,
+    "mobile_home_pct": 1.1,
+    "electric_heat_pct": 51.3,
+    "rooftop_eligible_pct": 78.4
+  },
+  "Manassas Park": {
+    "total_units": 5459,
+    "single_family_pct": 45.0,
+    "townhome_pct": 29.5,
+    "apartment_pct": 25.5,
+    "mobile_home_pct": 0.0,
+    "electric_heat_pct": 27.9,
+    "rooftop_eligible_pct": 74.5
+  },
+  "Martinsville": {
+    "total_units": 7065,
+    "single_family_pct": 73.9,
+    "townhome_pct": 1.0,
+    "apartment_pct": 23.6,
+    "mobile_home_pct": 1.4,
+    "electric_heat_pct": 59.9,
+    "rooftop_eligible_pct": 76.4
+  },
+  "Newport News": {
+    "total_units": 81418,
+    "single_family_pct": 50.0,
+    "townhome_pct": 7.8,
+    "apartment_pct": 39.4,
+    "mobile_home_pct": 2.6,
+    "electric_heat_pct": 58.6,
+    "rooftop_eligible_pct": 60.5
+  },
+  "Norfolk": {
+    "total_units": 100947,
+    "single_family_pct": 48.1,
+    "townhome_pct": 8.0,
+    "apartment_pct": 43.0,
+    "mobile_home_pct": 0.8,
+    "electric_heat_pct": 58.5,
+    "rooftop_eligible_pct": 56.9
+  },
+  "Norton": {
+    "total_units": 1801,
+    "single_family_pct": 50.6,
+    "townhome_pct": 2.7,
+    "apartment_pct": 33.9,
+    "mobile_home_pct": 12.7,
+    "electric_heat_pct": 95.0,
+    "rooftop_eligible_pct": 66.1
+  },
+  "Petersburg": {
+    "total_units": 17853,
+    "single_family_pct": 51.9,
+    "townhome_pct": 5.0,
+    "apartment_pct": 40.4,
+    "mobile_home_pct": 2.8,
+    "electric_heat_pct": 62.8,
+    "rooftop_eligible_pct": 59.6
+  },
+  "Poquoson": {
+    "total_units": 4906,
+    "single_family_pct": 89.5,
+    "townhome_pct": 4.8,
+    "apartment_pct": 4.7,
+    "mobile_home_pct": 1.0,
+    "electric_heat_pct": 45.8,
+    "rooftop_eligible_pct": 95.3
+  },
+  "Portsmouth": {
+    "total_units": 42934,
+    "single_family_pct": 61.5,
+    "townhome_pct": 9.8,
+    "apartment_pct": 28.1,
+    "mobile_home_pct": 0.6,
+    "electric_heat_pct": 46.2,
+    "rooftop_eligible_pct": 71.9
+  },
+  "Radford": {
+    "total_units": 6460,
+    "single_family_pct": 51.9,
+    "townhome_pct": 3.6,
+    "apartment_pct": 43.5,
+    "mobile_home_pct": 0.8,
+    "electric_heat_pct": 67.7,
+    "rooftop_eligible_pct": 56.3
+  },
+  "Salem": {
+    "total_units": 11086,
+    "single_family_pct": 72.2,
+    "townhome_pct": 3.8,
+    "apartment_pct": 21.8,
+    "mobile_home_pct": 2.1,
+    "electric_heat_pct": 39.3,
+    "rooftop_eligible_pct": 78.1
+  },
+  "Staunton": {
+    "total_units": 12264,
+    "single_family_pct": 71.4,
+    "townhome_pct": 4.6,
+    "apartment_pct": 23.4,
+    "mobile_home_pct": 0.6,
+    "electric_heat_pct": 43.6,
+    "rooftop_eligible_pct": 76.6
+  },
+  "Suffolk": {
+    "total_units": 38021,
+    "single_family_pct": 74.9,
+    "townhome_pct": 5.6,
+    "apartment_pct": 17.0,
+    "mobile_home_pct": 2.5,
+    "electric_heat_pct": 55.0,
+    "rooftop_eligible_pct": 82.9
+  },
+  "Virginia Beach": {
+    "total_units": 189187,
+    "single_family_pct": 54.6,
+    "townhome_pct": 19.2,
+    "apartment_pct": 25.1,
+    "mobile_home_pct": 1.1,
+    "electric_heat_pct": 62.1,
+    "rooftop_eligible_pct": 74.9
+  },
+  "Waynesboro": {
+    "total_units": 10201,
+    "single_family_pct": 66.4,
+    "townhome_pct": 3.3,
+    "apartment_pct": 29.1,
+    "mobile_home_pct": 1.2,
+    "electric_heat_pct": 43.3,
+    "rooftop_eligible_pct": 70.9
+  },
+  "Williamsburg": {
+    "total_units": 5686,
+    "single_family_pct": 42.1,
+    "townhome_pct": 14.3,
+    "apartment_pct": 43.5,
+    "mobile_home_pct": 0.1,
+    "electric_heat_pct": 49.6,
+    "rooftop_eligible_pct": 56.5
+  },
+  "Winchester": {
+    "total_units": 12268,
+    "single_family_pct": 59.3,
+    "townhome_pct": 9.6,
+    "apartment_pct": 30.7,
+    "mobile_home_pct": 0.4,
+    "electric_heat_pct": 45.6,
+    "rooftop_eligible_pct": 69.3
+  }
+}

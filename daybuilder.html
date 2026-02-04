@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMG Day Builder - One-Click Route Planning</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg-dark: #0f0f1a;
+            --bg-card: #1a1a2e;
+            --bg-hover: #252542;
+            --accent: #00d9ff;
+            --success: #00ff88;
+            --warning: #ffd93d;
+            --danger: #ff6b6b;
+            --text: #ffffff;
+            --text-muted: #888899;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+        }
+        .app-container {
+            display: grid;
+            grid-template-columns: 340px 1fr 380px;
+            height: 100vh;
+        }
+
+        /* Left Panel - Route List */
+        .route-panel {
+            background: var(--bg-card);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .panel-header {
+            padding: 1rem;
+            background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-dark) 100%);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .panel-header h2 {
+            font-size: 1.1rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        .search-box {
+            width: 100%;
+            padding: 0.6rem 1rem;
+            background: var(--bg-dark);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .filter-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+        .filter-btn {
+            flex: 1;
+            padding: 0.5rem;
+            font-size: 0.75rem;
+            background: var(--bg-dark);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover { border-color: var(--accent); color: var(--text); }
+        .filter-btn.active { background: var(--accent); color: var(--bg-dark); border-color: var(--accent); }
+        .filter-btn.fresh.active { background: var(--success); }
+        .filter-btn.moderate.active { background: var(--warning); }
+        .filter-btn.saturated.active { background: var(--danger); }
+
+        .route-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+        .route-card {
+            background: var(--bg-dark);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .route-card:hover {
+            border-color: var(--accent);
+            transform: translateX(4px);
+        }
+        .route-card.selected {
+            border-color: var(--accent);
+            background: rgba(0,217,255,0.1);
+        }
+        .route-card.in-plan {
+            border-color: var(--success);
+            background: rgba(0,255,136,0.1);
+        }
+        .route-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .route-id {
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        .route-priority {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .route-priority.FRESH { background: var(--success); color: var(--bg-dark); }
+        .route-priority.MODERATE { background: var(--warning); color: var(--bg-dark); }
+        .route-priority.SATURATED { background: var(--danger); color: var(--bg-dark); }
+        .route-location {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+        .route-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            font-size: 0.75rem;
+        }
+        .route-stat {
+            text-align: center;
+        }
+        .route-stat-value {
+            font-weight: 600;
+            color: var(--accent);
+        }
+        .route-stat-label {
+            color: var(--text-muted);
+            font-size: 0.65rem;
+        }
+        .add-btn {
+            width: 100%;
+            margin-top: 0.5rem;
+            padding: 0.4rem;
+            background: var(--accent);
+            border: none;
+            border-radius: 4px;
+            color: var(--bg-dark);
+            font-weight: 600;
+            font-size: 0.75rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.2s;
+        }
+        .route-card:hover .add-btn { opacity: 1; }
+        .route-card.in-plan .add-btn {
+            opacity: 1;
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Center - Map */
+        .map-container {
+            position: relative;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+        .map-overlay {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            z-index: 1000;
+            background: rgba(15,15,26,0.9);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .map-title {
+            font-size: 1.2rem;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+        .map-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Right Panel - Day Plan */
+        .plan-panel {
+            background: var(--bg-card);
+            border-left: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .plan-header {
+            padding: 1rem;
+            background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-dark) 100%);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .plan-header h2 {
+            font-size: 1.1rem;
+            color: var(--success);
+            margin-bottom: 0.5rem;
+        }
+        .date-picker {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        .date-input {
+            flex: 1;
+            padding: 0.5rem;
+            background: var(--bg-dark);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+        .rep-select {
+            width: 100%;
+            margin-top: 0.75rem;
+            padding: 0.5rem;
+            background: var(--bg-dark);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .plan-summary {
+            padding: 1rem;
+            background: var(--bg-dark);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+        .summary-item {
+            text-align: center;
+            padding: 0.5rem;
+            background: var(--bg-card);
+            border-radius: 6px;
+        }
+        .summary-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .summary-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .plan-routes {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+        .plan-route {
+            background: var(--bg-dark);
+            border: 1px solid var(--success);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+        .plan-route-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .plan-route-num {
+            width: 24px;
+            height: 24px;
+            background: var(--success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--bg-dark);
+        }
+        .plan-route-info {
+            flex: 1;
+            margin-left: 0.75rem;
+        }
+        .plan-route-id {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .plan-route-loc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .remove-btn {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.25rem;
+        }
+        .plan-route-stats {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .plan-route-stats span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .plan-route-stats .value { color: var(--accent); font-weight: 600; }
+
+        .plan-actions {
+            padding: 1rem;
+            background: var(--bg-dark);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .action-btn {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s;
+        }
+        .action-btn.primary {
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            color: var(--bg-dark);
+        }
+        .action-btn.secondary {
+            background: var(--bg-card);
+            color: var(--text);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .action-btn:hover { transform: translateY(-2px); }
+
+        /* Quick Stats Bar */
+        .quick-stats {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            gap: 1rem;
+            background: rgba(15,15,26,0.95);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .quick-stat {
+            text-align: center;
+        }
+        .quick-stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        .quick-stat-value.fresh { color: var(--success); }
+        .quick-stat-value.moderate { color: var(--warning); }
+        .quick-stat-value.saturated { color: var(--danger); }
+        .quick-stat-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        /* Housing Info Popup */
+        .housing-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.15rem 0.4rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            font-size: 0.65rem;
+            margin-right: 0.25rem;
+        }
+
+        .leaflet-popup-content-wrapper {
+            background: rgba(15,15,26,0.95);
+            color: var(--text);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .leaflet-popup-tip { background: rgba(15,15,26,0.95); }
+        .popup-content { padding: 0.5rem; }
+        .popup-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        .popup-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+        .popup-item { display: flex; justify-content: space-between; }
+        .popup-label { color: var(--text-muted); }
+        .popup-value { font-weight: 600; }
+        .popup-btn {
+            width: 100%;
+            margin-top: 0.75rem;
+            padding: 0.5rem;
+            background: var(--accent);
+            border: none;
+            border-radius: 6px;
+            color: var(--bg-dark);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Loading */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(0,217,255,0.2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--bg-hover); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Left Panel - Available Routes -->
+        <div class="route-panel">
+            <div class="panel-header">
+                <h2>Available Routes</h2>
+                <input type="text" class="search-box" placeholder="Search by location..." id="searchInput">
+                <div class="filter-row">
+                    <button class="filter-btn fresh active" data-filter="FRESH">Fresh</button>
+                    <button class="filter-btn moderate active" data-filter="MODERATE">Moderate</button>
+                    <button class="filter-btn saturated" data-filter="SATURATED">Saturated</button>
+                </div>
+            </div>
+            <div class="route-list" id="routeList">
+                <!-- Routes populated by JS -->
+            </div>
+        </div>
+
+        <!-- Center - Map -->
+        <div class="map-container">
+            <div class="map-overlay">
+                <div class="map-title">EMG Day Builder</div>
+                <div class="map-subtitle">Click routes to view details, add to plan</div>
+            </div>
+            <div id="map"></div>
+            <div class="quick-stats" id="quickStats">
+                <div class="quick-stat">
+                    <div class="quick-stat-value fresh" id="freshCount">-</div>
+                    <div class="quick-stat-label">FRESH</div>
+                </div>
+                <div class="quick-stat">
+                    <div class="quick-stat-value moderate" id="moderateCount">-</div>
+                    <div class="quick-stat-label">MODERATE</div>
+                </div>
+                <div class="quick-stat">
+                    <div class="quick-stat-value saturated" id="saturatedCount">-</div>
+                    <div class="quick-stat-label">SATURATED</div>
+                </div>
+                <div class="quick-stat">
+                    <div class="quick-stat-value" style="color: var(--accent);" id="totalHH">-</div>
+                    <div class="quick-stat-label">TOTAL HH</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Day Plan -->
+        <div class="plan-panel">
+            <div class="plan-header">
+                <h2>Today's Plan</h2>
+                <div class="date-picker">
+                    <input type="date" class="date-input" id="planDate">
+                </div>
+                <select class="rep-select" id="repSelect">
+                    <option value="">Select Rep...</option>
+                    <option value="JZ">Jason Zehr (74% conv)</option>
+                    <option value="OA">Omar Amin (60% conv)</option>
+                    <option value="DG">Derrick Greene (58% conv)</option>
+                    <option value="KM">Keiron Moore (55% conv)</option>
+                    <option value="ML">Malani Lamkin (52% conv)</option>
+                </select>
+            </div>
+
+            <div class="plan-summary">
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-value" id="planRoutes">0</div>
+                        <div class="summary-label">ROUTES</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value" id="planHH">0</div>
+                        <div class="summary-label">HOUSEHOLDS</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value" id="planCloses">0</div>
+                        <div class="summary-label">EST. CLOSES</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-value" id="planKWH">0</div>
+                        <div class="summary-label">kWh POTENTIAL</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="plan-routes" id="planRoutes">
+                <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                    <p style="font-size: 2rem; margin-bottom: 0.5rem;">+</p>
+                    <p>Click routes on map or list to add</p>
+                </div>
+            </div>
+
+            <div class="plan-actions">
+                <button class="action-btn primary" onclick="exportPlan()">Export Day Plan</button>
+                <button class="action-btn secondary" onclick="clearPlan()">Clear Plan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let routesData = null;
+        let routeLayers = {};
+        let selectedRoute = null;
+        let dayPlan = [];
+        let filters = { FRESH: true, MODERATE: true, SATURATED: false };
+
+        // Initialize map
+        const map = L.map('map', { zoomControl: true }).setView([37.5, -77.5], 8);
+
+        // Satellite base layer
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '&copy; Esri',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Priority map for lite format
+        const PRIORITY_MAP = { 'F': 'FRESH', 'M': 'MODERATE', 'S': 'SATURATED' };
+
+        // Expand lite props to full props
+        function expandProps(p) {
+            return {
+                route_id: p.id,
+                rank: p.r,
+                location: p.loc,
+                priority: PRIORITY_MAP[p.p],
+                final_score: p.sc,
+                households: p.hh,
+                conversion_rate: p.cv,
+                lmi_pct: p.lm || 70,  // LMI % - primary factor
+                electric_heat_pct: p.eh,
+                daily_kwh: p.kw,
+                freshness: p.fr,
+                center: p.ct,
+                housing_score: p.hs,
+                single_family_pct: p.sf
+            };
+        }
+
+        // Open Google Maps navigation to route center
+        function openNav(lat, lon) {
+            window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`, '_blank');
+        }
+
+        // Style functions
+        function getRouteStyle(priority, isSelected = false, inPlan = false) {
+            let color = '#00ff88';  // Fresh
+            if (priority === 'MODERATE' || priority === 'M') color = '#ffd93d';
+            if (priority === 'SATURATED' || priority === 'S') color = '#ff6b6b';
+
+            return {
+                fillColor: color,
+                fillOpacity: inPlan ? 0.7 : (isSelected ? 0.6 : 0.35),
+                color: inPlan ? '#00ff88' : (isSelected ? '#ffffff' : color),
+                weight: inPlan ? 3 : (isSelected ? 3 : 1),
+                opacity: 1
+            };
+        }
+
+        // Load optimized routes (80% smaller file)
+        fetch('routes_lite.geojson')
+            .then(r => r.json())
+            .then(data => {
+                routesData = data;
+                console.log(`Loaded ${data.total_routes} routes in optimized format`);
+                renderRoutes();
+                updateStats();
+                document.getElementById('loading').style.display = 'none';
+            })
+            .catch(err => {
+                console.error('Error loading routes:', err);
+                document.getElementById('loading').innerHTML = '<p style="color: #ff6b6b;">Error loading routes</p>';
+            });
+
+        function renderRoutes() {
+            const startTime = performance.now();
+
+            // Clear existing
+            Object.values(routeLayers).forEach(layer => map.removeLayer(layer));
+            routeLayers = {};
+
+            const listEl = document.getElementById('routeList');
+            listEl.innerHTML = '';
+
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+            // Use index for fast filtering when possible
+            let visibleIndices = [];
+            if (!searchTerm) {
+                // Use pre-built index
+                if (filters.FRESH) visibleIndices = visibleIndices.concat(routesData.index.by_priority.FRESH);
+                if (filters.MODERATE) visibleIndices = visibleIndices.concat(routesData.index.by_priority.MODERATE);
+                if (filters.SATURATED) visibleIndices = visibleIndices.concat(routesData.index.by_priority.SATURATED);
+            } else {
+                // Filter by search
+                routesData.features.forEach((f, i) => {
+                    const priority = PRIORITY_MAP[f.properties.p];
+                    if (!filters[priority]) return;
+                    if (!f.properties.loc.toLowerCase().includes(searchTerm)) return;
+                    visibleIndices.push(i);
+                });
+            }
+
+            // Get features and sort by score
+            let visibleRoutes = visibleIndices.map(i => routesData.features[i]);
+            visibleRoutes.sort((a, b) => b.properties.sc - a.properties.sc);
+
+            // Limit to top 150 for performance
+            visibleRoutes = visibleRoutes.slice(0, 150);
+
+            // Batch DOM operations
+            const fragment = document.createDocumentFragment();
+
+            visibleRoutes.forEach(feature => {
+                const lp = feature.properties;  // Lite props
+                const p = expandProps(lp);      // Full props
+                const inPlan = dayPlan.some(r => r.route_id === p.route_id);
+
+                // Map layer
+                const layer = L.geoJSON(feature, {
+                    style: () => getRouteStyle(p.priority, false, inPlan)
+                }).addTo(map);
+
+                layer.on('click', () => selectRoute(p.route_id));
+                layer.on('mouseover', () => {
+                    if (selectedRoute !== p.route_id) {
+                        layer.setStyle({ fillOpacity: 0.5, weight: 2 });
+                    }
+                });
+                layer.on('mouseout', () => {
+                    if (selectedRoute !== p.route_id) {
+                        layer.setStyle(getRouteStyle(p.priority, false, inPlan));
+                    }
+                });
+
+                routeLayers[p.route_id] = { layer, props: p, feature };
+
+                // List card
+                const card = document.createElement('div');
+                card.className = `route-card ${inPlan ? 'in-plan' : ''}`;
+                card.id = `card-${p.route_id}`;
+                card.innerHTML = `
+                    <div class="route-header">
+                        <span class="route-id">#${p.rank} ${p.route_id}</span>
+                        <span class="route-priority ${p.priority}">${p.priority}</span>
+                    </div>
+                    <div class="route-location">${p.location}</div>
+                    <div style="margin-bottom: 0.5rem;">
+                        <span class="housing-badge" style="background: rgba(0,255,136,0.2);">LMI ${p.lmi_pct || 70}%</span>
+                        <span class="housing-badge">E-Heat ${p.electric_heat_pct}%</span>
+                        <span class="housing-badge">Conv ${p.conversion_rate}%</span>
+                    </div>
+                    <div class="route-stats">
+                        <div class="route-stat">
+                            <div class="route-stat-value">${p.final_score}</div>
+                            <div class="route-stat-label">SCORE</div>
+                        </div>
+                        <div class="route-stat">
+                            <div class="route-stat-value">${p.households}</div>
+                            <div class="route-stat-label">HH</div>
+                        </div>
+                        <div class="route-stat">
+                            <div class="route-stat-value">${(p.daily_kwh/1000).toFixed(0)}k</div>
+                            <div class="route-stat-label">kWh</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                        <button class="add-btn" style="flex: 1; opacity: 1;" onclick="event.stopPropagation(); togglePlan('${p.route_id}')">
+                            ${inPlan ? 'Remove' : 'Add'}
+                        </button>
+                        <button class="add-btn" style="flex: 1; opacity: 1; background: #4285f4;" onclick="event.stopPropagation(); openNav('${p.center[0]}', '${p.center[1]}')">
+                            Navigate
+                        </button>
+                    </div>
+                `;
+                card.onclick = () => selectRoute(p.route_id);
+                fragment.appendChild(card);
+            });
+
+            listEl.appendChild(fragment);
+            console.log(`Rendered ${visibleRoutes.length} routes in ${(performance.now() - startTime).toFixed(0)}ms`);
+        }
+
+        function selectRoute(routeId) {
+            // Deselect previous
+            if (selectedRoute && routeLayers[selectedRoute]) {
+                const prev = routeLayers[selectedRoute];
+                const inPlan = dayPlan.some(r => r.route_id === selectedRoute);
+                prev.layer.setStyle(getRouteStyle(prev.props.priority, false, inPlan));
+                const prevCard = document.getElementById(`card-${selectedRoute}`);
+                if (prevCard) prevCard.classList.remove('selected');
+            }
+
+            selectedRoute = routeId;
+
+            if (routeLayers[routeId]) {
+                const current = routeLayers[routeId];
+                const inPlan = dayPlan.some(r => r.route_id === routeId);
+                current.layer.setStyle(getRouteStyle(current.props.priority, true, inPlan));
+                map.fitBounds(current.layer.getBounds(), { padding: [50, 50] });
+
+                const card = document.getElementById(`card-${routeId}`);
+                if (card) {
+                    card.classList.add('selected');
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+                // Show popup
+                showRoutePopup(current.props, current.feature);
+            }
+        }
+
+        function showRoutePopup(props, feature) {
+            const bounds = L.geoJSON(feature).getBounds();
+            const center = bounds.getCenter();
+
+            const popup = L.popup()
+                .setLatLng(center)
+                .setContent(`
+                    <div class="popup-content">
+                        <div class="popup-title">${props.route_id} - ${props.location}</div>
+                        <div class="popup-grid">
+                            <div class="popup-item">
+                                <span class="popup-label">Score:</span>
+                                <span class="popup-value">${props.final_score}</span>
+                            </div>
+                            <div class="popup-item">
+                                <span class="popup-label">Conv Rate:</span>
+                                <span class="popup-value">${props.conversion_rate}%</span>
+                            </div>
+                            <div class="popup-item">
+                                <span class="popup-label">Households:</span>
+                                <span class="popup-value">${props.households}</span>
+                            </div>
+                            <div class="popup-item">
+                                <span class="popup-label">Freshness:</span>
+                                <span class="popup-value">${props.freshness}%</span>
+                            </div>
+                            <div class="popup-item">
+                                <span class="popup-label">Single Family:</span>
+                                <span class="popup-value">${props.single_family_pct}%</span>
+                            </div>
+                            <div class="popup-item">
+                                <span class="popup-label">Rooftop OK:</span>
+                                <span class="popup-value">${props.rooftop_eligible_pct}%</span>
+                            </div>
+                            <div class="popup-item">
+                                <span class="popup-label">Electric Heat:</span>
+                                <span class="popup-value">${props.electric_heat_pct}%</span>
+                            </div>
+                            <div class="popup-item">
+                                <span class="popup-label">Daily kWh:</span>
+                                <span class="popup-value">${(props.daily_kwh/1000).toFixed(0)}k</span>
+                            </div>
+                        </div>
+                        <button class="popup-btn" onclick="togglePlan('${props.route_id}')">
+                            ${dayPlan.some(r => r.route_id === props.route_id) ? 'Remove from Plan' : 'Add to Plan'}
+                        </button>
+                    </div>
+                `)
+                .openOn(map);
+        }
+
+        function togglePlan(routeId) {
+            const idx = dayPlan.findIndex(r => r.route_id === routeId);
+            if (idx >= 0) {
+                dayPlan.splice(idx, 1);
+            } else if (routeLayers[routeId]) {
+                dayPlan.push(routeLayers[routeId].props);
+            }
+            renderRoutes();
+            renderPlan();
+            map.closePopup();
+        }
+
+        function renderPlan() {
+            const container = document.getElementById('planRoutes');
+
+            if (dayPlan.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                        <p style="font-size: 2rem; margin-bottom: 0.5rem;">+</p>
+                        <p>Click routes on map or list to add</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = dayPlan.map((p, i) => `
+                    <div class="plan-route">
+                        <div class="plan-route-header">
+                            <div class="plan-route-num">${i + 1}</div>
+                            <div class="plan-route-info">
+                                <div class="plan-route-id">${p.route_id}</div>
+                                <div class="plan-route-loc">${p.location}</div>
+                            </div>
+                            <button class="remove-btn" onclick="togglePlan('${p.route_id}')">&times;</button>
+                        </div>
+                        <div class="plan-route-stats">
+                            <span><span class="value">${p.households}</span> HH</span>
+                            <span><span class="value">${p.conversion_rate}%</span> Conv</span>
+                            <span><span class="value">${(p.daily_kwh/1000).toFixed(0)}k</span> kWh</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Update summary
+            const totalHH = dayPlan.reduce((sum, p) => sum + p.households, 0);
+            const avgConv = dayPlan.length ? dayPlan.reduce((sum, p) => sum + p.conversion_rate, 0) / dayPlan.length / 100 : 0;
+            const totalKWH = dayPlan.reduce((sum, p) => sum + p.daily_kwh, 0);
+            const estCloses = Math.round(totalHH * avgConv * 0.33); // Assume knock 1/3 of HH
+
+            document.getElementById('planRoutes').previousElementSibling.querySelector('#planRoutes').textContent = dayPlan.length;
+            document.getElementById('planHH').textContent = totalHH.toLocaleString();
+            document.getElementById('planCloses').textContent = estCloses;
+            document.getElementById('planKWH').textContent = (totalKWH / 1000).toFixed(0) + 'k';
+        }
+
+        function updateStats() {
+            if (!routesData) return;
+
+            // Use pre-built index for fast stats
+            const fresh = routesData.index.by_priority.FRESH.length;
+            const moderate = routesData.index.by_priority.MODERATE.length;
+            const saturated = routesData.index.by_priority.SATURATED.length;
+            const totalHH = routesData.features.reduce((sum, f) => sum + f.properties.hh, 0);
+
+            document.getElementById('freshCount').textContent = fresh.toLocaleString();
+            document.getElementById('moderateCount').textContent = moderate.toLocaleString();
+            document.getElementById('saturatedCount').textContent = saturated.toLocaleString();
+            document.getElementById('totalHH').textContent = (totalHH / 1000).toFixed(0) + 'k';
+        }
+
+        function exportPlan() {
+            if (dayPlan.length === 0) {
+                alert('Add routes to your plan first!');
+                return;
+            }
+
+            const rep = document.getElementById('repSelect').value || 'Unassigned';
+            const date = document.getElementById('planDate').value || new Date().toISOString().split('T')[0];
+
+            const planData = {
+                date,
+                rep,
+                routes: dayPlan,
+                summary: {
+                    total_routes: dayPlan.length,
+                    total_households: dayPlan.reduce((sum, p) => sum + p.households, 0),
+                    total_kwh: dayPlan.reduce((sum, p) => sum + p.daily_kwh, 0),
+                    locations: [...new Set(dayPlan.map(p => p.location))]
+                }
+            };
+
+            const blob = new Blob([JSON.stringify(planData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dayplan_${date}_${rep}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function clearPlan() {
+            dayPlan = [];
+            renderRoutes();
+            renderPlan();
+        }
+
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.onclick = () => {
+                const filter = btn.dataset.filter;
+                filters[filter] = !filters[filter];
+                btn.classList.toggle('active');
+                renderRoutes();
+            };
+        });
+
+        // Debounced search for better performance
+        let searchTimeout;
+        document.getElementById('searchInput').oninput = () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(renderRoutes, 150);
+        };
+
+        // Set default date
+        document.getElementById('planDate').value = new Date().toISOString().split('T')[0];
+
+        // Initial render
+        renderPlan();
+    </script>
+</body>
+</html>
