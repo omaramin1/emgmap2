@@ -376,13 +376,182 @@
         ::-webkit-scrollbar-track { background: var(--bg); }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
 
+        /* Mobile Bottom Nav */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            z-index: 3000;
+            padding: 0.5rem 0;
+            padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+        }
+        .mobile-nav-items {
+            display: flex;
+            justify-content: space-around;
+        }
+        .mobile-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            color: var(--muted);
+            background: none;
+            border: none;
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+        .mobile-nav-item .nav-icon { font-size: 1.3rem; margin-bottom: 0.2rem; }
+        .mobile-nav-item.active { color: var(--accent); }
+        .mobile-nav-item:hover { color: var(--text); }
+
+        /* Mobile Toggle Menu */
+        .toggle-menu-btn {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 2500;
+            background: var(--card);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .toggle-menu {
+            display: none;
+            position: fixed;
+            top: 4.5rem;
+            right: 1rem;
+            z-index: 2500;
+            background: var(--card);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            min-width: 200px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        }
+        .toggle-menu.visible { display: block; }
+        .toggle-menu h4 {
+            color: var(--accent);
+            font-size: 0.75rem;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+        }
+        .toggle-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .toggle-item:last-child { border-bottom: none; }
+        .toggle-item label {
+            font-size: 0.85rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: var(--bg);
+            border-radius: 24px;
+            transition: 0.2s;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: var(--muted);
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+        .toggle-switch input:checked + .toggle-slider { background: var(--accent); }
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+            background: var(--bg);
+        }
+
+        /* Mobile Overlay */
+        .panel-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1999;
+        }
+        .panel-overlay.active { display: block; }
+
         /* Mobile responsive */
         @media (max-width: 1024px) {
             .app { grid-template-columns: 1fr; }
             .routes-panel, .detail-panel { display: none; }
-            .routes-panel.active, .detail-panel.active { display: flex; position: fixed; top: 0; bottom: 0; width: 320px; z-index: 2000; }
+            .routes-panel.active, .detail-panel.active {
+                display: flex;
+                position: fixed;
+                top: 0;
+                bottom: 60px;
+                width: 320px;
+                z-index: 2000;
+                animation: slideIn 0.2s ease-out;
+            }
             .routes-panel.active { left: 0; }
-            .detail-panel.active { right: 0; }
+            .detail-panel.active { right: 0; width: 100%; max-width: 360px; }
+            .mobile-nav { display: block; }
+            .toggle-menu-btn { display: flex; align-items: center; justify-content: center; }
+            .map-header {
+                top: 0.5rem;
+                left: 0.5rem;
+                right: auto;
+                padding: 0.5rem 0.75rem;
+            }
+            .map-stats {
+                bottom: 70px;
+                padding: 0.5rem 1rem;
+                gap: 0.75rem;
+            }
+            .stat-value { font-size: 0.95rem; }
+            @keyframes slideIn {
+                from { transform: translateX(-100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            .detail-panel.active {
+                animation-name: slideInRight;
+            }
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+        }
+
+        @media (max-width: 600px) {
+            .routes-panel.active, .detail-panel.active { width: 100%; max-width: 100%; }
+            .map-title { font-size: 0.95rem; }
+            .map-subtitle { font-size: 0.65rem; }
         }
     </style>
 </head>
@@ -399,7 +568,7 @@
                     <span class="filter-chip fresh active" data-filter="FRESH">Fresh</span>
                     <span class="filter-chip moderate active" data-filter="MODERATE">Moderate</span>
                     <span class="filter-chip" data-filter="SATURATED">Saturated</span>
-                    <span class="filter-chip lmi active" onclick="toggleLMI()">LMI Zones</span>
+                    <span class="filter-chip lmi active" id="lmiChip">LMI Zones</span>
                 </div>
             </div>
             <div class="routes-list" id="routesList"></div>
@@ -516,6 +685,67 @@
         </div>
     </div>
 
+    <!-- Mobile Bottom Nav -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-items">
+            <button class="mobile-nav-item" onclick="showMobilePanel('routes')" id="navRoutes">
+                <span class="nav-icon">📋</span>
+                <span>Routes</span>
+            </button>
+            <button class="mobile-nav-item active" onclick="showMobilePanel('map')" id="navMap">
+                <span class="nav-icon">🗺️</span>
+                <span>Map</span>
+            </button>
+            <button class="mobile-nav-item" onclick="showMobilePanel('details')" id="navDetails">
+                <span class="nav-icon">📊</span>
+                <span>Details</span>
+            </button>
+            <button class="mobile-nav-item" onclick="toggleMobileSettings()" id="navSettings">
+                <span class="nav-icon">⚙️</span>
+                <span>Settings</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Toggle Menu Button -->
+    <button class="toggle-menu-btn" onclick="toggleMobileSettings()" id="toggleMenuBtn">⚙️</button>
+
+    <!-- Mobile Toggle Menu -->
+    <div class="toggle-menu" id="toggleMenu">
+        <h4>Map Settings</h4>
+        <div class="toggle-item">
+            <label>🏘️ LMI Zones</label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggleLMI" checked onchange="handleToggleLMI()">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div class="toggle-item">
+            <label>🟢 Fresh Routes</label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggleFresh" checked onchange="handleFilterToggle('FRESH', this.checked)">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div class="toggle-item">
+            <label>🟡 Moderate Routes</label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggleModerate" checked onchange="handleFilterToggle('MODERATE', this.checked)">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div class="toggle-item">
+            <label>🔴 Saturated Routes</label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="toggleSaturated" onchange="handleFilterToggle('SATURATED', this.checked)">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Panel Overlay -->
+    <div class="panel-overlay" id="panelOverlay" onclick="closeMobilePanels()"></div>
+
     <script>
         // =================================================================
         // STATE
@@ -585,14 +815,7 @@
                 lmiLayer.bringToBack();
             });
 
-        function toggleLMI() {
-            showLMIZones = !showLMIZones;
-            if (lmiLayer) {
-                if (showLMIZones) { lmiLayer.addTo(map); lmiLayer.bringToBack(); }
-                else { map.removeLayer(lmiLayer); }
-            }
-            document.querySelector('.filter-chip.lmi').classList.toggle('active', showLMIZones);
-        }
+        // toggleLMI is now handled by filter persistence functions below
 
         // =================================================================
         // BACKTESTED ALGORITHM
@@ -847,6 +1070,153 @@
 
         const savedLog = localStorage.getItem('doorLog_' + new Date().toDateString());
         if (savedLog) { doorLog = JSON.parse(savedLog); updateDoorStats(); }
+
+        // =================================================================
+        // MOBILE NAVIGATION
+        // =================================================================
+        let currentMobilePanel = 'map';
+
+        function showMobilePanel(panel) {
+            currentMobilePanel = panel;
+            const routesPanel = document.getElementById('routesPanel');
+            const detailPanel = document.getElementById('detailPanel');
+            const overlay = document.getElementById('panelOverlay');
+
+            // Update nav active state
+            document.querySelectorAll('.mobile-nav-item').forEach(item => item.classList.remove('active'));
+            document.getElementById('nav' + panel.charAt(0).toUpperCase() + panel.slice(1))?.classList.add('active');
+
+            // Close settings menu if open
+            document.getElementById('toggleMenu').classList.remove('visible');
+
+            if (panel === 'routes') {
+                routesPanel.classList.add('active');
+                detailPanel.classList.remove('active');
+                overlay.classList.add('active');
+            } else if (panel === 'details') {
+                detailPanel.classList.add('active');
+                routesPanel.classList.remove('active');
+                overlay.classList.add('active');
+            } else {
+                routesPanel.classList.remove('active');
+                detailPanel.classList.remove('active');
+                overlay.classList.remove('active');
+            }
+        }
+
+        function closeMobilePanels() {
+            document.getElementById('routesPanel').classList.remove('active');
+            document.getElementById('detailPanel').classList.remove('active');
+            document.getElementById('panelOverlay').classList.remove('active');
+            document.getElementById('toggleMenu').classList.remove('visible');
+            document.querySelectorAll('.mobile-nav-item').forEach(item => item.classList.remove('active'));
+            document.getElementById('navMap').classList.add('active');
+            currentMobilePanel = 'map';
+        }
+
+        function toggleMobileSettings() {
+            const menu = document.getElementById('toggleMenu');
+            menu.classList.toggle('visible');
+        }
+
+        // =================================================================
+        // FILTER PERSISTENCE
+        // =================================================================
+        function loadFilterSettings() {
+            const saved = localStorage.getItem('emg_filter_settings');
+            if (saved) {
+                const settings = JSON.parse(saved);
+                filters = settings.filters || filters;
+                showLMIZones = settings.showLMI !== undefined ? settings.showLMI : showLMIZones;
+            }
+
+            // Sync UI with saved settings
+            document.getElementById('toggleLMI').checked = showLMIZones;
+            document.getElementById('toggleFresh').checked = filters.FRESH;
+            document.getElementById('toggleModerate').checked = filters.MODERATE;
+            document.getElementById('toggleSaturated').checked = filters.SATURATED;
+
+            // Sync filter chips
+            document.querySelectorAll('.filter-chip:not(.lmi)').forEach(chip => {
+                const f = chip.dataset.filter;
+                chip.classList.toggle('active', filters[f]);
+            });
+            document.getElementById('lmiChip')?.classList.toggle('active', showLMIZones);
+        }
+
+        function saveFilterSettings() {
+            const settings = {
+                filters: filters,
+                showLMI: showLMIZones
+            };
+            localStorage.setItem('emg_filter_settings', JSON.stringify(settings));
+        }
+
+        function handleToggleLMI() {
+            showLMIZones = document.getElementById('toggleLMI').checked;
+            if (lmiLayer) {
+                if (showLMIZones) { lmiLayer.addTo(map); lmiLayer.bringToBack(); }
+                else { map.removeLayer(lmiLayer); }
+            }
+            document.getElementById('lmiChip')?.classList.toggle('active', showLMIZones);
+            saveFilterSettings();
+        }
+
+        function handleFilterToggle(filterName, checked) {
+            filters[filterName] = checked;
+            // Sync filter chip
+            const chip = document.querySelector(`.filter-chip[data-filter="${filterName}"]`);
+            if (chip) chip.classList.toggle('active', checked);
+            renderRouteList();
+            saveFilterSettings();
+        }
+
+        // Override filter chip click to also save settings
+        document.querySelectorAll('.filter-chip:not(.lmi)').forEach(chip => {
+            chip.onclick = () => {
+                const f = chip.dataset.filter;
+                filters[f] = !filters[f];
+                chip.classList.toggle('active');
+                // Sync toggle switch
+                const toggle = document.getElementById('toggle' + f.charAt(0) + f.slice(1).toLowerCase());
+                if (toggle) toggle.checked = filters[f];
+                renderRouteList();
+                saveFilterSettings();
+            };
+        });
+
+        // Override LMI chip to save settings
+        const lmiChip = document.getElementById('lmiChip');
+        if (lmiChip) {
+            lmiChip.onclick = () => {
+                showLMIZones = !showLMIZones;
+                if (lmiLayer) {
+                    if (showLMIZones) { lmiLayer.addTo(map); lmiLayer.bringToBack(); }
+                    else { map.removeLayer(lmiLayer); }
+                }
+                lmiChip.classList.toggle('active', showLMIZones);
+                document.getElementById('toggleLMI').checked = showLMIZones;
+                saveFilterSettings();
+            };
+        }
+
+        // Load saved settings on startup
+        loadFilterSettings();
+
+        // Handle clicking outside toggle menu
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('toggleMenu');
+            const btn = document.getElementById('toggleMenuBtn');
+            const navBtn = document.getElementById('navSettings');
+            if (menu.classList.contains('visible') &&
+                !menu.contains(e.target) &&
+                e.target !== btn &&
+                e.target !== navBtn &&
+                !btn.contains(e.target) &&
+                !navBtn.contains(e.target)) {
+                menu.classList.remove('visible');
+            }
+        });
     </script>
 </body>
 </html>
