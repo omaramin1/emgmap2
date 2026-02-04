@@ -575,56 +575,72 @@
             }
         });
 
-        // Load historical pins from data file
+        // Load historical pins from data files
         let historicalStats = { complete: 0, pending: 0, invalid: 0, total: 0 };
 
-        fetch('pins.geojson')
-            .then(r => r.json())
-            .then(data => {
-                if (data.features) {
-                    console.log('Loading', data.features.length, 'historical pins...');
+        // Function to add pins to cluster
+        function addPinsToCluster(data, source) {
+            if (!data.features) return;
+            console.log(`Loading ${data.features.length} pins from ${source}...`);
 
-                    data.features.forEach(f => {
-                        const props = f.properties || {};
-                        const type = props.type || 'complete';
-                        const coords = f.geometry.coordinates;
-                        const lat = coords[1];
-                        const lng = coords[0];
+            data.features.forEach(f => {
+                const props = f.properties || {};
+                const type = props.type || 'complete';
+                const coords = f.geometry.coordinates;
+                const lat = coords[1];
+                const lng = coords[0];
 
-                        historicalPins.push({ type, lat, lng, historical: true, props });
-                        historicalStats[type] = (historicalStats[type] || 0) + 1;
-                        historicalStats.total++;
+                historicalPins.push({ type, lat, lng, historical: true, props });
+                historicalStats[type] = (historicalStats[type] || 0) + 1;
+                historicalStats.total++;
 
-                        // Color based on status
-                        const color = colors[type] || colors.complete;
-                        const icon = type === 'complete' ? '✓' : type === 'pending' ? '⏳' : '✗';
+                // Color based on status
+                const color = colors[type] || colors.complete;
+                const icon = type === 'complete' ? '✓' : type === 'pending' ? '⏳' : '✗';
 
-                        const marker = L.divIcon({
-                            className: 'pin-marker-wrapper',
-                            html: `<div class="pin-marker historical" style="background:${color}">${icon}</div>`,
-                            iconSize: [18, 18],
-                            iconAnchor: [9, 9]
-                        });
+                const marker = L.divIcon({
+                    className: 'pin-marker-wrapper',
+                    html: `<div class="pin-marker historical" style="background:${color}">${icon}</div>`,
+                    iconSize: [18, 18],
+                    iconAnchor: [9, 9]
+                });
 
-                        const popup = `<b>${type.toUpperCase()}</b><br>
-                            ${props.rep || ''}<br>
-                            ${props.date || ''}<br>
-                            <span style="color:#888">${props.city || ''}</span>`;
-
-                        // Add to cluster group instead of directly to map
-                        const m = L.marker([lat, lng], { icon: marker }).bindPopup(popup);
-                        historicalCluster.addLayer(m);
-                    });
-
-                    // Add cluster group to map
-                    map.addLayer(historicalCluster);
-
-                    updateAddress();
-                    console.log('Loaded historical pins:', historicalStats);
+                // Build popup with address if available
+                let popup;
+                if (props.address) {
+                    popup = `<div style="font-family: system-ui;">
+                        <strong>${props.address}</strong><br/>
+                        ${props.city || ''}, ${props.state || 'VA'} ${props.zip || ''}<br/>
+                        <span style="color: #666;">Sale: ${props.sale_date || props.date || ''}</span>
+                    </div>`;
+                } else {
+                    popup = `<b>${type.toUpperCase()}</b><br>
+                        ${props.rep || ''}<br>
+                        ${props.date || ''}<br>
+                        <span style="color:#888">${props.city || ''}</span>`;
                 }
-            }).catch(e => {
-                console.log('No historical pins file or error:', e);
+
+                // Add to cluster group
+                const m = L.marker([lat, lng], { icon: marker }).bindPopup(popup);
+                historicalCluster.addLayer(m);
             });
+
+            updateAddress();
+            console.log(`Loaded from ${source}:`, historicalStats);
+        }
+
+        // Load both pin files
+        Promise.all([
+            fetch('va_sales_pins.geojson').then(r => r.ok ? r.json() : null).catch(() => null),
+            fetch('pins.geojson').then(r => r.ok ? r.json() : null).catch(() => null)
+        ]).then(([vaSales, oldPins]) => {
+            if (vaSales) addPinsToCluster(vaSales, 'va_sales_pins.geojson');
+            if (oldPins) addPinsToCluster(oldPins, 'pins.geojson');
+
+            // Add cluster group to map after all pins loaded
+            map.addLayer(historicalCluster);
+            console.log('Total historical pins:', historicalStats.total);
+        });
 
         // Update address on map move
         map.on('moveend', updateAddress);
