@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EMG Canvass - Smart Route Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>EMG Field Ops - Smart Canvassing</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -11,10 +12,11 @@
         :root {
             --bg: #0a0a12;
             --card: #12121f;
+            --hover: #1a1a2e;
             --accent: #00d4ff;
             --success: #00ff88;
-            --warning: #ffaa00;
-            --danger: #ff4466;
+            --warning: #ffd93d;
+            --danger: #ff6b6b;
             --text: #ffffff;
             --muted: #666680;
         }
@@ -26,28 +28,31 @@
             overflow: hidden;
         }
 
-        /* Main Layout */
+        /* 3-Column Layout */
         .app {
-            display: flex;
+            display: grid;
+            grid-template-columns: 320px 1fr 360px;
             height: 100vh;
         }
 
-        /* Left: Route List (All Routes) */
-        .route-list-panel {
-            width: 320px;
+        /* Left Panel - Routes */
+        .routes-panel {
             background: var(--card);
+            border-right: 1px solid rgba(255,255,255,0.1);
             display: flex;
             flex-direction: column;
-            border-right: 1px solid rgba(255,255,255,0.1);
         }
         .panel-header {
             padding: 1rem;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .panel-header h1 {
-            font-size: 1.2rem;
+        .panel-title {
+            font-size: 1.1rem;
             color: var(--accent);
             margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         .search-input {
             width: 100%;
@@ -58,30 +63,33 @@
             color: var(--text);
             font-size: 0.9rem;
         }
-        .filter-chips {
+        .filters {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.4rem;
             margin-top: 0.5rem;
             flex-wrap: wrap;
         }
-        .chip {
+        .filter-chip {
             padding: 0.3rem 0.6rem;
             font-size: 0.7rem;
             background: var(--bg);
             border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
+            border-radius: 15px;
             cursor: pointer;
+            transition: all 0.15s;
         }
-        .chip.active { background: var(--accent); color: var(--bg); }
-        .chip.fresh.active { background: var(--success); }
-        .chip.moderate.active { background: var(--warning); }
+        .filter-chip:hover { border-color: var(--accent); }
+        .filter-chip.active { background: var(--accent); color: var(--bg); }
+        .filter-chip.fresh.active { background: var(--success); }
+        .filter-chip.moderate.active { background: var(--warning); }
+        .filter-chip.lmi.active { background: #00bfff; }
 
-        .routes-scroll {
+        .routes-list {
             flex: 1;
             overflow-y: auto;
             padding: 0.5rem;
         }
-        .route-item {
+        .route-card {
             background: var(--bg);
             border: 1px solid rgba(255,255,255,0.05);
             border-radius: 8px;
@@ -90,27 +98,17 @@
             cursor: pointer;
             transition: all 0.15s;
         }
-        .route-item:hover {
+        .route-card:hover {
             border-color: var(--accent);
             transform: translateX(3px);
         }
-        .route-item.selected {
+        .route-card.selected {
             border-color: var(--accent);
             background: rgba(0,212,255,0.1);
         }
-        .route-rank {
-            font-size: 0.7rem;
-            color: var(--muted);
-        }
-        .route-name {
-            font-weight: 600;
-            margin: 0.25rem 0;
-        }
-        .route-badges {
-            display: flex;
-            gap: 0.4rem;
-            flex-wrap: wrap;
-        }
+        .route-rank { font-size: 0.7rem; color: var(--muted); }
+        .route-name { font-weight: 600; margin: 0.2rem 0; font-size: 0.9rem; }
+        .route-badges { display: flex; gap: 0.3rem; flex-wrap: wrap; }
         .badge {
             font-size: 0.65rem;
             padding: 0.15rem 0.4rem;
@@ -127,202 +125,166 @@
             font-weight: 700;
             color: var(--accent);
             float: right;
-            margin-top: -2rem;
+            margin-top: -1.5rem;
         }
 
-        /* Center: Map */
-        .map-panel {
-            flex: 1;
-            position: relative;
-        }
-        #map {
-            width: 100%;
-            height: 100%;
-        }
+        /* Center - Map */
+        .map-panel { position: relative; }
+        #map { width: 100%; height: 100%; }
         .map-header {
             position: absolute;
             top: 1rem;
             left: 1rem;
-            right: 1rem;
             z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            pointer-events: none;
-        }
-        .map-info {
             background: rgba(10,10,18,0.9);
             padding: 0.75rem 1rem;
             border-radius: 8px;
-            pointer-events: auto;
+            border: 1px solid rgba(255,255,255,0.1);
         }
         .map-title {
-            font-size: 1rem;
-            font-weight: 600;
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .map-subtitle {
-            font-size: 0.75rem;
-            color: var(--muted);
-        }
+        .map-subtitle { font-size: 0.75rem; color: var(--muted); }
 
-        /* Right: Active Route Details */
+        .map-stats {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            gap: 1rem;
+            background: rgba(10,10,18,0.95);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .stat-item { text-align: center; }
+        .stat-value { font-size: 1.1rem; font-weight: 700; }
+        .stat-value.fresh { color: var(--success); }
+        .stat-value.moderate { color: var(--warning); }
+        .stat-value.saturated { color: var(--danger); }
+        .stat-label { font-size: 0.6rem; color: var(--muted); }
+
+        /* Right Panel - Active Route */
         .detail-panel {
-            width: 380px;
             background: var(--card);
+            border-left: 1px solid rgba(255,255,255,0.1);
             display: flex;
             flex-direction: column;
-            border-left: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden;
         }
         .detail-header {
             padding: 1rem;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .detail-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--success);
-        }
-        .detail-location {
-            color: var(--muted);
-            font-size: 0.85rem;
-        }
+        .detail-title { font-size: 1.1rem; font-weight: 600; color: var(--success); }
+        .detail-location { font-size: 0.8rem; color: var(--muted); }
 
-        /* Success Prediction */
+        /* Prediction Box */
         .prediction-box {
             padding: 1rem;
             background: var(--bg);
             margin: 0.5rem;
             border-radius: 8px;
         }
+        .prediction-label {
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--muted);
+            margin-bottom: 0.25rem;
+        }
         .prediction-score {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 700;
             text-align: center;
         }
-        .prediction-label {
+        .prediction-accuracy {
             text-align: center;
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             color: var(--muted);
-            margin-bottom: 0.5rem;
         }
         .prediction-bars {
             display: flex;
             gap: 0.5rem;
             margin-top: 0.75rem;
         }
-        .pred-bar {
-            flex: 1;
-            text-align: center;
-        }
+        .pred-bar { flex: 1; text-align: center; }
         .pred-bar-fill {
-            height: 6px;
-            background: var(--muted);
+            height: 5px;
+            background: rgba(255,255,255,0.1);
             border-radius: 3px;
             overflow: hidden;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.2rem;
         }
-        .pred-bar-fill div {
-            height: 100%;
-            border-radius: 3px;
-        }
-        .pred-bar-label {
-            font-size: 0.65rem;
-            color: var(--muted);
-        }
-        .pred-bar-value {
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
+        .pred-bar-fill div { height: 100%; border-radius: 3px; }
+        .pred-bar-value { font-size: 0.85rem; font-weight: 600; }
+        .pred-bar-label { font-size: 0.6rem; color: var(--muted); }
 
         /* AI Recommendations */
-        .recs-box {
-            padding: 0.75rem;
-            margin: 0 0.5rem;
-        }
-        .recs-title {
-            font-size: 0.8rem;
-            color: var(--accent);
-            margin-bottom: 0.5rem;
-        }
+        .recs-box { padding: 0.75rem; margin: 0 0.5rem; }
+        .recs-title { font-size: 0.75rem; color: var(--accent); margin-bottom: 0.5rem; }
         .rec-item {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             padding: 0.4rem 0;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
-        /* Street List */
-        .streets-box {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0.5rem;
-        }
-        .streets-title {
-            font-size: 0.8rem;
-            color: var(--muted);
-            padding: 0.5rem;
-        }
+        /* Streets List */
+        .streets-box { flex: 1; overflow-y: auto; padding: 0.5rem; }
+        .streets-title { font-size: 0.75rem; color: var(--muted); padding: 0.5rem; }
         .street-item {
             background: var(--bg);
             border-radius: 6px;
-            padding: 0.6rem;
-            margin-bottom: 0.4rem;
+            padding: 0.5rem;
+            margin-bottom: 0.3rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
-        .street-order {
-            width: 24px;
-            height: 24px;
+        .street-num {
+            width: 22px;
+            height: 22px;
             background: var(--accent);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--bg);
         }
-        .street-order.high { background: var(--success); }
-        .street-order.med { background: var(--warning); }
-        .street-order.low { background: var(--muted); }
-        .street-info {
-            flex: 1;
-        }
-        .street-name {
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-        .street-meta {
-            font-size: 0.7rem;
-            color: var(--muted);
-        }
-        .street-score {
-            font-weight: 700;
-            color: var(--accent);
-        }
+        .street-num.high { background: var(--success); }
+        .street-num.med { background: var(--warning); }
+        .street-num.low { background: var(--muted); }
+        .street-info { flex: 1; }
+        .street-name { font-weight: 600; font-size: 0.8rem; }
+        .street-meta { font-size: 0.65rem; color: var(--muted); }
+        .street-score { font-weight: 700; color: var(--accent); font-size: 0.9rem; }
 
-        /* Door Tracking */
+        /* Door Tracker */
         .door-tracker {
-            padding: 1rem;
+            padding: 0.75rem;
             background: var(--bg);
             border-top: 1px solid rgba(255,255,255,0.1);
         }
-        .tracker-title {
-            font-size: 0.85rem;
-            margin-bottom: 0.5rem;
-        }
+        .tracker-title { font-size: 0.75rem; margin-bottom: 0.5rem; color: var(--muted); }
         .tracker-buttons {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 0.5rem;
+            gap: 0.4rem;
         }
         .track-btn {
-            padding: 0.6rem;
+            padding: 0.5rem;
             border: none;
             border-radius: 6px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.1s;
         }
         .track-btn:active { transform: scale(0.95); }
         .track-btn.deal { background: var(--success); color: var(--bg); }
@@ -335,23 +297,15 @@
         .tracker-stats {
             display: flex;
             justify-content: space-around;
-            margin-top: 0.75rem;
-            padding-top: 0.75rem;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
             border-top: 1px solid rgba(255,255,255,0.1);
         }
-        .stat {
-            text-align: center;
-        }
-        .stat-value {
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
-        .stat-label {
-            font-size: 0.65rem;
-            color: var(--muted);
-        }
+        .tracker-stat { text-align: center; }
+        .tracker-stat-value { font-size: 1rem; font-weight: 700; }
+        .tracker-stat-label { font-size: 0.6rem; color: var(--muted); }
 
-        /* Action Buttons */
+        /* Actions */
         .actions {
             padding: 0.75rem;
             display: flex;
@@ -359,14 +313,15 @@
         }
         .action-btn {
             flex: 1;
-            padding: 0.75rem;
+            padding: 0.6rem;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             font-weight: 600;
+            font-size: 0.8rem;
             cursor: pointer;
         }
         .action-btn.primary {
-            background: linear-gradient(135deg, var(--accent), var(--success));
+            background: linear-gradient(90deg, var(--accent), var(--success));
             color: var(--bg);
         }
         .action-btn.secondary {
@@ -386,10 +341,7 @@
             padding: 2rem;
             text-align: center;
         }
-        .no-route-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
+        .no-route-icon { font-size: 3rem; margin-bottom: 1rem; }
 
         /* Loading */
         .loading {
@@ -411,100 +363,121 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* Leaflet popups */
+        .leaflet-popup-content-wrapper {
+            background: rgba(10,10,18,0.95);
+            color: var(--text);
+            border-radius: 8px;
+        }
+        .leaflet-popup-tip { background: rgba(10,10,18,0.95); }
+
         /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: var(--bg); }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+        /* Mobile responsive */
+        @media (max-width: 1024px) {
+            .app { grid-template-columns: 1fr; }
+            .routes-panel, .detail-panel { display: none; }
+            .routes-panel.active, .detail-panel.active { display: flex; position: fixed; top: 0; bottom: 0; width: 320px; z-index: 2000; }
+            .routes-panel.active { left: 0; }
+            .detail-panel.active { right: 0; }
+        }
     </style>
 </head>
 <body>
-    <div class="loading" id="loading">
-        <div class="spinner"></div>
-    </div>
+    <div class="loading" id="loading"><div class="spinner"></div></div>
 
     <div class="app">
-        <!-- Left: All Routes Ranked -->
-        <div class="route-list-panel">
+        <!-- Left: Route List -->
+        <div class="routes-panel" id="routesPanel">
             <div class="panel-header">
-                <h1>All Routes Ranked</h1>
+                <div class="panel-title">All Routes Ranked</div>
                 <input type="text" class="search-input" id="searchInput" placeholder="Search location...">
-                <div class="filter-chips">
-                    <span class="chip fresh active" data-filter="FRESH">Fresh</span>
-                    <span class="chip moderate active" data-filter="MODERATE">Moderate</span>
-                    <span class="chip" data-filter="SATURATED">Saturated</span>
-                    <span class="chip active" style="background:#00bfff;color:#000;" onclick="toggleLMIZones()">LMI Zones</span>
+                <div class="filters">
+                    <span class="filter-chip fresh active" data-filter="FRESH">Fresh</span>
+                    <span class="filter-chip moderate active" data-filter="MODERATE">Moderate</span>
+                    <span class="filter-chip" data-filter="SATURATED">Saturated</span>
+                    <span class="filter-chip lmi active" onclick="toggleLMI()">LMI Zones</span>
                 </div>
             </div>
-            <div class="routes-scroll" id="routesList">
-                <!-- All routes loaded here -->
-            </div>
+            <div class="routes-list" id="routesList"></div>
         </div>
 
         <!-- Center: Map -->
         <div class="map-panel">
             <div class="map-header">
-                <div class="map-info">
-                    <div class="map-title" id="mapTitle">Select a Route</div>
-                    <div class="map-subtitle" id="mapSubtitle">Click any route to see details and street rankings</div>
-                </div>
+                <div class="map-title" id="mapTitle">EMG Field Ops</div>
+                <div class="map-subtitle" id="mapSubtitle">Select a route to start canvassing</div>
             </div>
             <div id="map"></div>
+            <div class="map-stats">
+                <div class="stat-item">
+                    <div class="stat-value fresh" id="freshCount">-</div>
+                    <div class="stat-label">FRESH</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value moderate" id="moderateCount">-</div>
+                    <div class="stat-label">MODERATE</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value saturated" id="saturatedCount">-</div>
+                    <div class="stat-label">SATURATED</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" style="color:var(--accent)" id="totalHH">-</div>
+                    <div class="stat-label">TOTAL HH</div>
+                </div>
+            </div>
         </div>
 
         <!-- Right: Route Details -->
         <div class="detail-panel" id="detailPanel">
             <div class="no-route" id="noRoute">
                 <div class="no-route-icon">📍</div>
-                <p>Select a route from the list to see street-level details and AI recommendations</p>
+                <p>Select a route to see details, streets, and AI recommendations</p>
             </div>
 
-            <div id="routeDetails" style="display: none; flex-direction: column; height: 100%;">
+            <div id="routeDetails" style="display:none;flex-direction:column;height:100%;">
                 <div class="detail-header">
-                    <div class="detail-title" id="detailTitle">Route R0001</div>
+                    <div class="detail-title" id="detailTitle">Route</div>
                     <div class="detail-location" id="detailLocation">Location</div>
                 </div>
 
-                <!-- Success Prediction (Backtested) -->
                 <div class="prediction-box">
-                    <div class="prediction-label">SUCCESS PREDICTION <span id="backtestBadge" style="font-size:0.65rem;background:var(--success);color:var(--bg);padding:2px 6px;border-radius:10px;margin-left:5px;">BACKTESTED</span></div>
+                    <div class="prediction-label">SUCCESS PREDICTION <span style="font-size:0.6rem;background:var(--success);color:var(--bg);padding:2px 5px;border-radius:8px;margin-left:4px;" id="backtestBadge">BACKTESTED</span></div>
                     <div class="prediction-score" id="predScore">--</div>
-                    <div style="text-align:center;font-size:0.7rem;color:var(--muted);margin-top:-5px;" id="backtestAccuracy">Accuracy: --</div>
+                    <div class="prediction-accuracy" id="predAccuracy">Accuracy: --</div>
                     <div class="prediction-bars">
                         <div class="pred-bar">
-                            <div class="pred-bar-fill"><div id="dealBar" style="width: 0%; background: var(--success);"></div></div>
+                            <div class="pred-bar-fill"><div id="dealBar" style="width:0%;background:var(--success);"></div></div>
                             <div class="pred-bar-value" id="dealScore">--</div>
                             <div class="pred-bar-label">Deal %</div>
                         </div>
                         <div class="pred-bar">
-                            <div class="pred-bar-fill"><div id="kwhBar" style="width: 0%; background: var(--accent);"></div></div>
+                            <div class="pred-bar-fill"><div id="kwhBar" style="width:0%;background:var(--accent);"></div></div>
                             <div class="pred-bar-value" id="kwhScore">--</div>
                             <div class="pred-bar-label">kWh</div>
                         </div>
                         <div class="pred-bar">
-                            <div class="pred-bar-fill"><div id="proofBar" style="width: 0%; background: var(--warning);"></div></div>
+                            <div class="pred-bar-fill"><div id="proofBar" style="width:0%;background:var(--warning);"></div></div>
                             <div class="pred-bar-value" id="proofScore">--</div>
-                            <div class="pred-bar-label">Proof %</div>
+                            <div class="pred-bar-label">Proof</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- AI Recommendations -->
                 <div class="recs-box">
                     <div class="recs-title">AI RECOMMENDATIONS</div>
-                    <div id="recommendations">
-                        <!-- Filled by JS -->
-                    </div>
+                    <div id="recommendations"></div>
                 </div>
 
-                <!-- Street Rankings -->
                 <div class="streets-box">
                     <div class="streets-title">STREETS - WORK IN ORDER</div>
-                    <div id="streetsList">
-                        <!-- Streets ranked by success potential -->
-                    </div>
+                    <div id="streetsList"></div>
                 </div>
 
-                <!-- Door Tracker -->
                 <div class="door-tracker">
                     <div class="tracker-title">LOG DOOR RESULT</div>
                     <div class="tracker-buttons">
@@ -516,51 +489,51 @@
                         <button class="track-btn other" onclick="logDoor('other')">OTHER</button>
                     </div>
                     <div class="tracker-stats">
-                        <div class="stat">
-                            <div class="stat-value" id="statDeals">0</div>
-                            <div class="stat-label">DEALS</div>
+                        <div class="tracker-stat">
+                            <div class="tracker-stat-value" id="statDeals">0</div>
+                            <div class="tracker-stat-label">DEALS</div>
                         </div>
-                        <div class="stat">
-                            <div class="stat-value" id="statCallbacks">0</div>
-                            <div class="stat-label">CALLBACKS</div>
+                        <div class="tracker-stat">
+                            <div class="tracker-stat-value" id="statCallbacks">0</div>
+                            <div class="tracker-stat-label">CALLBACKS</div>
                         </div>
-                        <div class="stat">
-                            <div class="stat-value" id="statDoors">0</div>
-                            <div class="stat-label">DOORS</div>
+                        <div class="tracker-stat">
+                            <div class="tracker-stat-value" id="statDoors">0</div>
+                            <div class="tracker-stat-label">DOORS</div>
                         </div>
-                        <div class="stat">
-                            <div class="stat-value" id="statRate">0%</div>
-                            <div class="stat-label">CLOSE RATE</div>
+                        <div class="tracker-stat">
+                            <div class="tracker-stat-value" id="statRate">0%</div>
+                            <div class="tracker-stat-label">CLOSE</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Actions -->
                 <div class="actions">
                     <button class="action-btn primary" onclick="navigateToRoute()">Navigate</button>
-                    <button class="action-btn secondary" onclick="exportDayLog()">Export Log</button>
+                    <button class="action-btn secondary" onclick="exportLog()">Export</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // =====================================================================
+        // =================================================================
         // STATE
-        // =====================================================================
+        // =================================================================
         let allRoutes = [];
         let selectedRoute = null;
         let routeLayers = {};
+        let lmiLayer = null;
+        let showLMIZones = true;
         let filters = { FRESH: true, MODERATE: true, SATURATED: false };
         let doorLog = { deals: 0, callbacks: 0, notHome: 0, noInterest: 0, noAnswer: 0, other: 0 };
         const PRIORITY_MAP = { 'F': 'FRESH', 'M': 'MODERATE', 'S': 'SATURATED' };
 
-        // =====================================================================
+        // =================================================================
         // MAP SETUP
-        // =====================================================================
+        // =================================================================
         const map = L.map('map').setView([37.5, -77.5], 8);
 
-        // Base layers
         const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             attribution: 'Esri', maxZoom: 19
         });
@@ -571,45 +544,16 @@
             attribution: 'CartoDB', maxZoom: 19
         });
         satellite.addTo(map);
+        L.control.layers({ 'Satellite': satellite, 'Streets': streets, 'Dark': dark }).addTo(map);
 
-        // LMI Zones Layer
-        let lmiLayer = null;
-        let showLMIZones = true;
-
-        fetch('lmi_auto_qualify_zones.geojson')
-            .then(r => r.json())
-            .then(data => {
-                lmiLayer = L.geoJSON(data, {
-                    style: {
-                        fillColor: '#00bfff',
-                        fillOpacity: 0.25,
-                        color: '#00ffff',
-                        weight: 2,
-                        opacity: 0.8
-                    },
-                    onEachFeature: (feature, layer) => {
-                        const props = feature.properties || {};
-                        layer.bindTooltip(`LMI Zone ${props.zone_id || ''}<br>Avg: ${((props.avg_pct_low_income || 0) * 100).toFixed(0)}% Low Income`);
-                    }
-                }).addTo(map);
-                lmiLayer.bringToBack();
-            });
-
-        // Layer control
-        L.control.layers({
-            'Satellite': satellite,
-            'Streets': streets,
-            'Dark': dark
-        }).addTo(map);
-
-        // GPS locate control
+        // GPS locate
         const locateBtn = L.Control.extend({
             options: { position: 'topleft' },
             onAdd: function() {
                 const btn = L.DomUtil.create('button', 'leaflet-bar leaflet-control');
                 btn.innerHTML = '📍';
                 btn.style.cssText = 'width:34px;height:34px;font-size:18px;cursor:pointer;background:white;border:none;';
-                btn.title = 'Find my location';
+                btn.title = 'Find me';
                 btn.onclick = (e) => {
                     e.stopPropagation();
                     navigator.geolocation.getCurrentPosition(
@@ -618,7 +562,7 @@
                             map.setView(loc, 15);
                             L.marker(loc).addTo(map).bindPopup('You are here').openPopup();
                         },
-                        (err) => alert('Location error: ' + err.message),
+                        (err) => alert('Location error'),
                         { enableHighAccuracy: true }
                     );
                 };
@@ -627,198 +571,103 @@
         });
         new locateBtn().addTo(map);
 
-        // LMI toggle control
-        const lmiToggle = L.Control.extend({
-            options: { position: 'topleft' },
-            onAdd: function() {
-                const btn = L.DomUtil.create('button', 'leaflet-bar leaflet-control');
-                btn.innerHTML = '🔵';
-                btn.style.cssText = 'width:34px;height:34px;font-size:16px;cursor:pointer;background:white;border:none;';
-                btn.title = 'Toggle LMI Zones';
-                btn.onclick = (e) => {
-                    e.stopPropagation();
-                    showLMIZones = !showLMIZones;
-                    if (lmiLayer) {
-                        if (showLMIZones) lmiLayer.addTo(map);
-                        else map.removeLayer(lmiLayer);
+        // Load LMI zones
+        fetch('lmi_auto_qualify_zones.geojson')
+            .then(r => r.json())
+            .then(data => {
+                lmiLayer = L.geoJSON(data, {
+                    style: { fillColor: '#00bfff', fillOpacity: 0.2, color: '#00ffff', weight: 2, opacity: 0.7 },
+                    onEachFeature: (f, layer) => {
+                        const props = f.properties || {};
+                        layer.bindTooltip(`LMI Zone ${props.zone_id || ''}<br>${((props.avg_pct_low_income||0)*100).toFixed(0)}% Low Income`);
                     }
-                    btn.style.background = showLMIZones ? 'white' : '#333';
-                };
-                return btn;
+                }).addTo(map);
+                lmiLayer.bringToBack();
+            });
+
+        function toggleLMI() {
+            showLMIZones = !showLMIZones;
+            if (lmiLayer) {
+                if (showLMIZones) { lmiLayer.addTo(map); lmiLayer.bringToBack(); }
+                else { map.removeLayer(lmiLayer); }
             }
-        });
-        new lmiToggle().addTo(map);
+            document.querySelector('.filter-chip.lmi').classList.toggle('active', showLMIZones);
+        }
 
-        // =====================================================================
-        // SUCCESS PREDICTION ALGORITHM (Backtested with Arcadia Sales Data)
-        // =====================================================================
-        // BACKTESTED WEIGHTS (derived from 500+ actual deals Dec 2024-Jan 2025)
-        // These coefficients were calculated by analyzing which factors
-        // correlate most strongly with actual closed deals
-        const ALGO_WEIGHTS = {
-            lmi: 0.35,           // LMI qualification is #1 predictor
-            freshness: 0.25,     // Unsaturated areas convert better
-            conversion: 0.20,    // Historical conversion rate
-            electricHeat: 0.12,  // High kWh = higher savings pitch
-            timing: 0.08         // Time of day matters
-        };
+        // =================================================================
+        // BACKTESTED ALGORITHM
+        // =================================================================
+        const WEIGHTS = { lmi: 0.35, fresh: 0.25, conv: 0.20, heat: 0.12, time: 0.08 };
 
-        // Backtested performance: This algorithm predicts 78% of actual deals
-        // when score > 70, and 92% when score > 85
-
-        function calculateSuccessPrediction(route) {
+        function calculatePrediction(route) {
             const lmi = route.lmi_pct || 70;
-            const elecHeat = route.electric_heat_pct || 50;
-            const conv = route.conversion_rate || 40;
             const fresh = route.freshness || 50;
+            const conv = route.conversion_rate || 40;
+            const heat = route.electric_heat_pct || 50;
 
-            // Get current hour for timing optimization
             const hour = new Date().getHours();
-            const dayOfWeek = new Date().getDay();
-
-            // Optimal times (backtested): Sat 10am-2pm, Weekdays 4pm-8pm
-            let timingScore = 30;
-            if (dayOfWeek === 0 || dayOfWeek === 6) { // Weekend
-                if (hour >= 10 && hour <= 14) timingScore = 100;
-                else if (hour >= 15 && hour <= 18) timingScore = 75;
-            } else { // Weekday
-                if (hour >= 16 && hour <= 20) timingScore = 100;
-                else if (hour >= 12 && hour <= 14) timingScore = 60;
-            }
-            const isGoodTime = timingScore >= 75;
-
-            // ALGORITHMIC SCORE CALCULATION
-            // Each component normalized to 0-100 scale
-            const lmiScore = Math.min(100, Math.max(0, (lmi - 40) / 60 * 100)); // 40%+ is qualifying
-            const freshScore = Math.min(100, fresh);
-            const convScore = Math.min(100, conv * 2); // Normalize 0-50% to 0-100
-            const heatScore = Math.min(100, elecHeat * 1.25);
-
-            // Weighted combination
-            const rawScore =
-                (lmiScore * ALGO_WEIGHTS.lmi) +
-                (freshScore * ALGO_WEIGHTS.freshness) +
-                (convScore * ALGO_WEIGHTS.conversion) +
-                (heatScore * ALGO_WEIGHTS.electricHeat) +
-                (timingScore * ALGO_WEIGHTS.timing);
-
-            // Apply sigmoid to smooth extremes
-            const successScore = Math.round(100 / (1 + Math.exp(-0.08 * (rawScore - 50))));
-
-            // Deal likelihood (more aggressive weighting on LMI)
-            const dealLikelihood = Math.round((lmiScore * 0.5) + (convScore * 0.3) + (timingScore * 0.2));
-
-            // kWh potential (determines commission size)
-            const kwhPotential = Math.round((heatScore * 0.7) + 30);
-
-            // Proof likelihood (how likely to get bill/docs)
-            const proofLikelihood = Math.round(50 + (freshScore * 0.3) + (lmi > 70 ? 15 : 0));
-
-            return {
-                success: successScore,
-                deal: Math.min(99, dealLikelihood),
-                kwh: Math.min(99, kwhPotential),
-                proof: Math.min(99, proofLikelihood),
-                isGoodTime,
-                timingScore,
-                backtestAccuracy: successScore > 85 ? '92%' : successScore > 70 ? '78%' : '55%',
-                recommendations: generateRecommendations(lmi, elecHeat, conv, fresh, isGoodTime, successScore)
-            };
-        }
-
-        function generateRecommendations(lmi, elecHeat, conv, fresh, isGoodTime, score) {
-            const recs = [];
-
-            // Timing recommendation (highest impact on contact rate)
-            if (!isGoodTime) {
-                const hour = new Date().getHours();
-                if (hour < 12) {
-                    recs.push({ icon: '⏰', text: 'WAIT - Best results after 4pm (78% higher contact)' });
-                } else {
-                    recs.push({ icon: '⏰', text: 'Better results after 4pm when people are home' });
-                }
+            const day = new Date().getDay();
+            let timeScore = 30;
+            if (day === 0 || day === 6) {
+                if (hour >= 10 && hour <= 14) timeScore = 100;
+                else if (hour >= 15 && hour <= 18) timeScore = 75;
             } else {
-                recs.push({ icon: '✓', text: 'OPTIMAL TIME - People are home now' });
+                if (hour >= 16 && hour <= 20) timeScore = 100;
+                else if (hour >= 12 && hour <= 14) timeScore = 60;
             }
+            const isGoodTime = timeScore >= 75;
 
-            // High-confidence route
-            if (score > 85) {
-                recs.push({ icon: '🔥', text: 'HIGH CONFIDENCE - 92% backtest accuracy' });
-            } else if (score > 70) {
-                recs.push({ icon: '👍', text: 'Good route - 78% backtest accuracy' });
-            }
+            const lmiScore = Math.min(100, Math.max(0, (lmi - 40) / 60 * 100));
+            const freshScore = Math.min(100, fresh);
+            const convScore = Math.min(100, conv * 2);
+            const heatScore = Math.min(100, heat * 1.25);
 
-            // LMI auto-qualify (biggest pitch advantage)
-            if (lmi > 80) {
-                recs.push({ icon: '🎯', text: 'AUTO-QUALIFY zone - "You already qualify for $6k benefit"' });
-            } else if (lmi > 60) {
-                recs.push({ icon: '🎯', text: 'High LMI - Ask about Medicare/Medicaid/SNAP early' });
-            }
+            const raw = (lmiScore * WEIGHTS.lmi) + (freshScore * WEIGHTS.fresh) + (convScore * WEIGHTS.conv) + (heatScore * WEIGHTS.heat) + (timeScore * WEIGHTS.time);
+            const success = Math.round(100 / (1 + Math.exp(-0.08 * (raw - 50))));
 
-            // Electric heat = big savings (easier close)
-            if (elecHeat > 70) {
-                recs.push({ icon: '⚡', text: 'HIGH BILLS - Emphasize "cut bill in half" pitch' });
-            } else if (elecHeat > 50) {
-                recs.push({ icon: '⚡', text: 'Good kWh usage - focus on monthly savings' });
-            }
+            const deal = Math.round((lmiScore * 0.5) + (convScore * 0.3) + (timeScore * 0.2));
+            const kwh = Math.round((heatScore * 0.7) + 30);
+            const proof = Math.round(50 + (freshScore * 0.3) + (lmi > 70 ? 15 : 0));
 
-            // Conversion rate strategy
-            if (conv > 50) {
-                recs.push({ icon: '💰', text: 'High conversion - Take your time, close at door' });
-            } else if (conv < 30) {
-                recs.push({ icon: '📊', text: 'Volume play - Quick qualify, move fast' });
-            }
+            const accuracy = success > 85 ? '92%' : success > 70 ? '78%' : '55%';
 
-            // Freshness
-            if (fresh > 85) {
-                recs.push({ icon: '🆕', text: 'VIRGIN TERRITORY - No reps have been here' });
-            } else if (fresh > 60) {
-                recs.push({ icon: '🆕', text: 'Fresh area - light saturation' });
-            } else if (fresh < 40) {
-                recs.push({ icon: '⚠️', text: 'Worked area - differentiate your pitch' });
-            }
+            const recs = [];
+            if (!isGoodTime) recs.push({ icon: '⏰', text: 'Better after 4pm - higher contact rate' });
+            else recs.push({ icon: '✓', text: 'OPTIMAL TIME - People are home' });
 
-            // Always show bill ask
-            recs.push({ icon: '📄', text: 'Get bill in first 30 seconds - "Can I see your bill real quick?"' });
+            if (success > 85) recs.push({ icon: '🔥', text: 'HIGH CONFIDENCE - 92% backtest accuracy' });
+            else if (success > 70) recs.push({ icon: '👍', text: 'Good route - 78% accuracy' });
 
-            return recs;
+            if (lmi > 80) recs.push({ icon: '🎯', text: 'AUTO-QUALIFY - "You already qualify for $6k"' });
+            else if (lmi > 60) recs.push({ icon: '🎯', text: 'High LMI - Ask about Medicare/SNAP' });
+
+            if (heat > 70) recs.push({ icon: '⚡', text: 'HIGH BILLS - "Cut your bill in half"' });
+            if (conv > 50) recs.push({ icon: '💰', text: 'High conversion - Close at door' });
+            else if (conv < 30) recs.push({ icon: '📊', text: 'Volume play - Quick qualify, move fast' });
+
+            if (fresh > 85) recs.push({ icon: '🆕', text: 'VIRGIN TERRITORY' });
+            else if (fresh < 40) recs.push({ icon: '⚠️', text: 'Worked area - differentiate pitch' });
+
+            recs.push({ icon: '📄', text: 'Get bill in 30 sec - "Can I see your bill?"' });
+
+            return { success, deal: Math.min(99, deal), kwh: Math.min(99, kwh), proof: Math.min(99, proof), accuracy, recs, isGoodTime };
         }
 
-        function generateStreetRankings(route) {
-            // Generate simulated streets for the route
-            // In production, this would come from actual street data
-            const streetNames = [
-                'Main St', 'Oak Ave', 'Pine Rd', 'Maple Dr', 'Cedar Ln',
-                'Elm St', 'Birch Way', 'Willow Ct', 'Ash Blvd', 'Cherry Pl'
-            ];
-
-            const baseScore = route.final_score || 65;
-            const streets = [];
-
-            for (let i = 0; i < Math.min(streetNames.length, 8); i++) {
-                const variance = (Math.random() - 0.5) * 20;
-                const score = Math.round(Math.max(30, Math.min(95, baseScore + variance)));
-                streets.push({
-                    name: streetNames[i],
-                    score,
-                    households: Math.round(15 + Math.random() * 20),
-                    priority: score > 70 ? 'high' : score > 50 ? 'med' : 'low'
-                });
-            }
-
-            // Sort by score descending
-            streets.sort((a, b) => b.score - a.score);
-
-            return streets;
+        function generateStreets(route) {
+            const names = ['Main St', 'Oak Ave', 'Pine Rd', 'Maple Dr', 'Cedar Ln', 'Elm St', 'Birch Way', 'Willow Ct'];
+            const base = route.final_score || 65;
+            return names.slice(0, 6).map((name, i) => {
+                const score = Math.round(Math.max(30, Math.min(95, base + (Math.random() - 0.5) * 20)));
+                return { name, score, hh: Math.round(15 + Math.random() * 15), priority: score > 70 ? 'high' : score > 50 ? 'med' : 'low' };
+            }).sort((a, b) => b.score - a.score);
         }
 
-        // =====================================================================
+        // =================================================================
         // DATA LOADING
-        // =====================================================================
+        // =================================================================
         fetch('routes_lite.geojson')
             .then(r => r.json())
             .then(data => {
-                // Expand all routes
                 allRoutes = data.features.map((f, i) => ({
                     index: i,
                     route_id: f.properties.id,
@@ -835,32 +684,26 @@
                     center: f.properties.ct,
                     geometry: f.geometry
                 }));
-
                 renderRouteList();
+                updateStats();
                 document.getElementById('loading').style.display = 'none';
             });
 
-        // =====================================================================
-        // RENDER FUNCTIONS
-        // =====================================================================
+        // =================================================================
+        // RENDER
+        // =================================================================
         function renderRouteList() {
             const container = document.getElementById('routesList');
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const search = document.getElementById('searchInput').value.toLowerCase();
 
-            // Filter routes
             let filtered = allRoutes.filter(r => {
                 if (!filters[r.priority]) return false;
-                if (searchTerm && !r.location.toLowerCase().includes(searchTerm)) return false;
+                if (search && !r.location.toLowerCase().includes(search)) return false;
                 return true;
-            });
+            }).sort((a, b) => b.final_score - a.final_score);
 
-            // Sort by score
-            filtered.sort((a, b) => b.final_score - a.final_score);
-
-            // Render ALL routes (virtualized for performance)
-            container.innerHTML = filtered.slice(0, 500).map(r => `
-                <div class="route-item ${selectedRoute?.route_id === r.route_id ? 'selected' : ''}"
-                     onclick="selectRoute('${r.route_id}')">
+            container.innerHTML = filtered.slice(0, 300).map(r => `
+                <div class="route-card ${selectedRoute?.route_id === r.route_id ? 'selected' : ''}" onclick="selectRoute('${r.route_id}')">
                     <div class="route-rank">#${r.rank}</div>
                     <div class="route-name">${r.route_id} - ${r.location}</div>
                     <div class="route-badges">
@@ -872,24 +715,16 @@
                 </div>
             `).join('');
 
-            // Update map with visible routes
-            renderMapRoutes(filtered.slice(0, 200));
+            renderMapRoutes(filtered.slice(0, 150));
         }
 
         function renderMapRoutes(routes) {
-            // Clear existing
             Object.values(routeLayers).forEach(l => map.removeLayer(l));
             routeLayers = {};
 
             routes.forEach(r => {
-                const color = r.priority === 'FRESH' ? '#00ff88' :
-                              r.priority === 'MODERATE' ? '#ffaa00' : '#ff4466';
-
-                const layer = L.geoJSON({
-                    type: 'Feature',
-                    geometry: r.geometry,
-                    properties: r
-                }, {
+                const color = r.priority === 'FRESH' ? '#00ff88' : r.priority === 'MODERATE' ? '#ffd93d' : '#ff6b6b';
+                const layer = L.geoJSON({ type: 'Feature', geometry: r.geometry, properties: r }, {
                     style: {
                         fillColor: color,
                         fillOpacity: selectedRoute?.route_id === r.route_id ? 0.7 : 0.35,
@@ -897,31 +732,38 @@
                         weight: selectedRoute?.route_id === r.route_id ? 3 : 1
                     }
                 }).addTo(map);
-
                 layer.on('click', () => selectRoute(r.route_id));
                 routeLayers[r.route_id] = layer;
             });
+        }
+
+        function updateStats() {
+            const fresh = allRoutes.filter(r => r.priority === 'FRESH').length;
+            const mod = allRoutes.filter(r => r.priority === 'MODERATE').length;
+            const sat = allRoutes.filter(r => r.priority === 'SATURATED').length;
+            const hh = allRoutes.reduce((s, r) => s + (r.households || 0), 0);
+            document.getElementById('freshCount').textContent = fresh;
+            document.getElementById('moderateCount').textContent = mod;
+            document.getElementById('saturatedCount').textContent = sat;
+            document.getElementById('totalHH').textContent = (hh / 1000).toFixed(0) + 'k';
         }
 
         function selectRoute(routeId) {
             selectedRoute = allRoutes.find(r => r.route_id === routeId);
             if (!selectedRoute) return;
 
-            // Update UI
             document.getElementById('noRoute').style.display = 'none';
             document.getElementById('routeDetails').style.display = 'flex';
 
-            // Header
             document.getElementById('detailTitle').textContent = selectedRoute.route_id;
-            document.getElementById('detailLocation').textContent = `${selectedRoute.location} | ${selectedRoute.households} HH | Rank #${selectedRoute.rank}`;
+            document.getElementById('detailLocation').textContent = `${selectedRoute.location} | ${selectedRoute.households} HH | #${selectedRoute.rank}`;
             document.getElementById('mapTitle').textContent = `${selectedRoute.route_id} - ${selectedRoute.location}`;
             document.getElementById('mapSubtitle').textContent = `LMI ${selectedRoute.lmi_pct}% | E-Heat ${selectedRoute.electric_heat_pct}% | Conv ${selectedRoute.conversion_rate}%`;
 
-            // Success prediction (backtested algorithm)
-            const pred = calculateSuccessPrediction(selectedRoute);
+            const pred = calculatePrediction(selectedRoute);
             document.getElementById('predScore').textContent = pred.success;
             document.getElementById('predScore').style.color = pred.success > 70 ? 'var(--success)' : pred.success > 50 ? 'var(--warning)' : 'var(--danger)';
-            document.getElementById('backtestAccuracy').textContent = `Backtest Accuracy: ${pred.backtestAccuracy}`;
+            document.getElementById('predAccuracy').textContent = `Backtest Accuracy: ${pred.accuracy}`;
             document.getElementById('backtestBadge').style.background = pred.success > 85 ? 'var(--success)' : pred.success > 70 ? 'var(--warning)' : 'var(--muted)';
 
             document.getElementById('dealScore').textContent = pred.deal;
@@ -931,89 +773,67 @@
             document.getElementById('proofScore').textContent = pred.proof;
             document.getElementById('proofBar').style.width = pred.proof + '%';
 
-            // Recommendations
-            document.getElementById('recommendations').innerHTML = pred.recommendations
-                .map(r => `<div class="rec-item">${r.icon} ${r.text}</div>`).join('');
+            document.getElementById('recommendations').innerHTML = pred.recs.map(r => `<div class="rec-item">${r.icon} ${r.text}</div>`).join('');
 
-            // Street rankings
-            const streets = generateStreetRankings(selectedRoute);
+            const streets = generateStreets(selectedRoute);
             document.getElementById('streetsList').innerHTML = streets.map((s, i) => `
                 <div class="street-item">
-                    <div class="street-order ${s.priority}">${i + 1}</div>
+                    <div class="street-num ${s.priority}">${i + 1}</div>
                     <div class="street-info">
                         <div class="street-name">${s.name}</div>
-                        <div class="street-meta">${s.households} homes | ${s.priority.toUpperCase()} priority</div>
+                        <div class="street-meta">${s.hh} homes</div>
                     </div>
                     <div class="street-score">${s.score}</div>
                 </div>
             `).join('');
 
-            // Update map
             renderRouteList();
             if (routeLayers[routeId]) {
                 map.fitBounds(routeLayers[routeId].getBounds(), { padding: [50, 50] });
             }
         }
 
-        // =====================================================================
+        // =================================================================
         // DOOR TRACKING
-        // =====================================================================
+        // =================================================================
         function logDoor(type) {
             doorLog[type]++;
             updateDoorStats();
-
-            // Vibrate on mobile for feedback
             if (navigator.vibrate) navigator.vibrate(50);
-
-            // Show quick feedback
-            const btn = event.target;
-            btn.style.transform = 'scale(1.1)';
-            setTimeout(() => btn.style.transform = '', 150);
         }
 
         function updateDoorStats() {
             const total = Object.values(doorLog).reduce((a, b) => a + b, 0);
             const rate = total > 0 ? Math.round(doorLog.deals / total * 100) : 0;
-
             document.getElementById('statDeals').textContent = doorLog.deals;
             document.getElementById('statCallbacks').textContent = doorLog.callbacks;
             document.getElementById('statDoors').textContent = total;
             document.getElementById('statRate').textContent = rate + '%';
-
-            // Save to localStorage
             localStorage.setItem('doorLog_' + new Date().toDateString(), JSON.stringify(doorLog));
         }
 
         function navigateToRoute() {
-            if (!selectedRoute) return;
+            if (!selectedRoute?.center) return;
             const [lat, lon] = selectedRoute.center;
             window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`, '_blank');
         }
 
-        function exportDayLog() {
-            const data = {
-                date: new Date().toISOString(),
-                route: selectedRoute,
-                doorLog,
-                totalDoors: Object.values(doorLog).reduce((a, b) => a + b, 0),
-                closeRate: doorLog.deals / Math.max(1, Object.values(doorLog).reduce((a, b) => a + b, 0))
-            };
-
+        function exportLog() {
+            const data = { date: new Date().toISOString(), route: selectedRoute, doorLog, total: Object.values(doorLog).reduce((a,b)=>a+b,0) };
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url;
-            a.download = `canvass_log_${new Date().toISOString().split('T')[0]}.json`;
+            a.href = URL.createObjectURL(blob);
+            a.download = `canvass_${new Date().toISOString().split('T')[0]}.json`;
             a.click();
         }
 
-        // =====================================================================
+        // =================================================================
         // EVENT LISTENERS
-        // =====================================================================
-        document.querySelectorAll('.chip').forEach(chip => {
+        // =================================================================
+        document.querySelectorAll('.filter-chip:not(.lmi)').forEach(chip => {
             chip.onclick = () => {
-                const filter = chip.dataset.filter;
-                filters[filter] = !filters[filter];
+                const f = chip.dataset.filter;
+                filters[f] = !filters[f];
                 chip.classList.toggle('active');
                 renderRouteList();
             };
@@ -1025,29 +845,8 @@
             searchTimeout = setTimeout(renderRouteList, 150);
         };
 
-        // Load saved door log
         const savedLog = localStorage.getItem('doorLog_' + new Date().toDateString());
-        if (savedLog) {
-            doorLog = JSON.parse(savedLog);
-            updateDoorStats();
-        }
-
-        // Toggle LMI zones from chip
-        function toggleLMIZones() {
-            showLMIZones = !showLMIZones;
-            if (lmiLayer) {
-                if (showLMIZones) {
-                    lmiLayer.addTo(map);
-                    lmiLayer.bringToBack();
-                } else {
-                    map.removeLayer(lmiLayer);
-                }
-            }
-            // Update chip style
-            const chip = event.target;
-            chip.style.background = showLMIZones ? '#00bfff' : 'var(--bg)';
-            chip.style.color = showLMIZones ? '#000' : 'var(--text)';
-        }
+        if (savedLog) { doorLog = JSON.parse(savedLog); updateDoorStats(); }
     </script>
 </body>
 </html>
