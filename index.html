@@ -1,58 +1,634 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>EMG Canvassing Maps - Dominion VA</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1e40af">
+    <title>EMG Field Ops</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
-        h1 { color: #1d4ed8; }
-        .region { display: block; padding: 15px; margin: 10px 0; background: #f0f7ff;
-                  border-radius: 8px; text-decoration: none; color: #333;
-                  border-left: 4px solid #2563eb; }
-        .region:hover { background: #e0efff; }
-        .region b { color: #1d4ed8; font-size: 18px; }
-        .region small { color: #666; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #1e40af;
+            --primary-light: #3b82f6;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--light);
+            min-height: 100vh;
+        }
+        .app { display: flex; flex-direction: column; height: 100vh; }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .header h1 { font-size: 18px; font-weight: 600; }
+        .header-stats { display: flex; gap: 12px; font-size: 12px; }
+        .stat-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+
+        /* Main */
+        .main-content {
+            flex: 1;
+            margin-top: 52px;
+            margin-bottom: 70px;
+            overflow-y: auto;
+        }
+        .screen { display: none; height: 100%; }
+        .screen.active { display: flex; flex-direction: column; }
+
+        /* Map */
+        #map { flex: 1; width: 100%; min-height: 400px; }
+        .map-controls {
+            position: absolute;
+            top: 60px; right: 10px;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .map-btn {
+            width: 40px; height: 40px;
+            border-radius: 8px;
+            border: none;
+            background: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .zone-legend {
+            position: absolute;
+            bottom: 140px; left: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            z-index: 999;
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+        .legend-color { width: 14px; height: 14px; border-radius: 3px; }
+
+        .next-target-card {
+            position: absolute;
+            bottom: 80px; left: 10px; right: 10px;
+            background: white;
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 999;
+        }
+        .target-score {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+        }
+        .score-hot { background: linear-gradient(135deg, #ef4444, #f97316); }
+        .score-warm { background: linear-gradient(135deg, #f59e0b, #eab308); }
+        .score-cool { background: linear-gradient(135deg, #3b82f6, #6366f1); }
+        .target-info { flex: 1; }
+        .target-address { font-weight: 600; font-size: 14px; }
+        .target-details { font-size: 11px; color: #666; margin-top: 2px; }
+        .target-tags { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
+        .tag { font-size: 9px; padding: 2px 6px; border-radius: 8px; font-weight: 600; }
+        .tag-lmi { background: #dbeafe; color: #1e40af; }
+        .tag-highkwh { background: #dcfce7; color: #166534; }
+        .tag-owner { background: #fef3c7; color: #92400e; }
+        .nav-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        /* Dashboard */
+        .dashboard { padding: 16px; }
+        .greeting { font-size: 22px; font-weight: 700; color: var(--dark); }
+        .date-text { color: #666; font-size: 13px; margin-bottom: 16px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .stat-card.primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            grid-column: span 2;
+        }
+        .stat-value { font-size: 24px; font-weight: 700; }
+        .stat-label { font-size: 11px; opacity: 0.8; margin-top: 2px; }
+        .stat-progress { height: 6px; background: rgba(255,255,255,0.3); border-radius: 3px; margin-top: 10px; }
+        .stat-progress-bar { height: 100%; background: white; border-radius: 3px; transition: width 0.3s; }
+
+        .section-title { font-size: 14px; font-weight: 600; color: var(--dark); margin: 16px 0 10px; }
+        .action-list { display: flex; flex-direction: column; gap: 8px; }
+        .action-card {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+        .action-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .action-icon.blue { background: #dbeafe; color: #1e40af; }
+        .action-icon.green { background: #dcfce7; color: #166534; }
+        .action-icon.orange { background: #ffedd5; color: #c2410c; }
+        .action-icon.purple { background: #f3e8ff; color: #7c3aed; }
+        .action-text { flex: 1; }
+        .action-title { font-weight: 600; font-size: 13px; }
+        .action-subtitle { font-size: 11px; color: #666; }
+
+        /* Route */
+        .route-list { padding: 16px; }
+        .route-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .route-title { font-size: 16px; font-weight: 700; }
+        .route-meta { font-size: 11px; color: #666; }
+        .stop-card {
+            background: white;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .stop-number {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+        }
+        .stop-card.completed .stop-number { background: var(--success); }
+        .stop-card.skipped .stop-number { background: #9ca3af; }
+        .stop-content { flex: 1; }
+        .stop-address { font-weight: 600; font-size: 13px; }
+        .stop-meta { font-size: 11px; color: #666; }
+        .stop-actions { display: flex; gap: 6px; }
+        .stop-btn {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: none;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .stop-btn.done { background: var(--success); color: white; }
+        .stop-btn.skip { background: var(--light); color: #666; }
+        .stop-btn.sold { background: var(--warning); color: white; }
+
+        /* Region Selector */
+        .region-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 16px; }
+        .region-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .region-card:hover, .region-card.selected { border-color: var(--primary); }
+        .region-card i { font-size: 24px; color: var(--primary); margin-bottom: 8px; }
+        .region-name { font-weight: 600; font-size: 13px; }
+        .region-count { font-size: 11px; color: #666; }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 20px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 6px 12px;
+            color: #9ca3af;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        .nav-item.active { color: var(--primary); }
+        .nav-item i { font-size: 20px; margin-bottom: 3px; }
+
+        /* Utilities */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-sm { padding: 8px 14px; font-size: 12px; }
+        .text-center { text-align: center; }
+        .mt-2 { margin-top: 8px; }
+        .mt-4 { margin-top: 16px; }
     </style>
 </head>
 <body>
-    <h1>🔵 EMG Canvassing Maps</h1>
-    <p>Dominion Energy Virginia - LMI Auto-Qualify Zones</p>
-    <p><b>Select your region:</b></p>
+    <div class="app">
+        <header class="header">
+            <h1><i class="fas fa-solar-panel"></i> EMG Field Ops</h1>
+            <div class="header-stats">
+                <span class="stat-badge"><i class="fas fa-fire"></i> <span id="h-deals">0</span>/10</span>
+                <span class="stat-badge"><i class="fas fa-bolt"></i> <span id="h-kwh">0</span>k</span>
+            </div>
+        </header>
 
-    <a class="region" href="emg_map_hampton_roads.html">
-        <b>Hampton Roads</b><br>
-        <small>Norfolk, Virginia Beach, Chesapeake, Hampton, Newport News, Suffolk</small>
-    </a>
+        <main class="main-content">
+            <!-- Dashboard -->
+            <section id="screen-home" class="screen active dashboard">
+                <div class="greeting">Welcome back!</div>
+                <div class="date-text" id="today-date"></div>
 
-    <a class="region" href="emg_map_richmond.html">
-        <b>Richmond Metro</b><br>
-        <small>Richmond, Henrico, Chesterfield, Hanover, Colonial Heights, Hopewell</small>
-    </a>
+                <div class="stats-grid">
+                    <div class="stat-card primary">
+                        <div class="stat-value"><span id="deals-today">0</span> / 10</div>
+                        <div class="stat-label">Deals Today (100k kWh Goal)</div>
+                        <div class="stat-progress"><div class="stat-progress-bar" id="deal-bar" style="width:0%"></div></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="doors-count">0</div>
+                        <div class="stat-label">Doors</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="conv-rate">0%</div>
+                        <div class="stat-label">Close Rate</div>
+                    </div>
+                </div>
 
-    <a class="region" href="emg_map_petersburg_southside.html">
-        <b>Petersburg & Southside</b><br>
-        <small>Petersburg, Danville, Halifax, Mecklenburg, Brunswick, Sussex</small>
-    </a>
+                <div class="section-title">Quick Actions</div>
+                <div class="action-list">
+                    <div class="action-card" onclick="nav('map')">
+                        <div class="action-icon blue"><i class="fas fa-map-marked-alt"></i></div>
+                        <div class="action-text">
+                            <div class="action-title">Start Canvassing</div>
+                            <div class="action-subtitle" id="hot-leads-count">Loading zones...</div>
+                        </div>
+                        <i class="fas fa-chevron-right" style="color:#ccc"></i>
+                    </div>
+                    <div class="action-card" onclick="nav('route')">
+                        <div class="action-icon green"><i class="fas fa-route"></i></div>
+                        <div class="action-text">
+                            <div class="action-title">Today's Route</div>
+                            <div class="action-subtitle">Optimized walking path</div>
+                        </div>
+                        <i class="fas fa-chevron-right" style="color:#ccc"></i>
+                    </div>
+                    <div class="action-card" onclick="nav('zones')">
+                        <div class="action-icon purple"><i class="fas fa-layer-group"></i></div>
+                        <div class="action-text">
+                            <div class="action-title">Browse Zones</div>
+                            <div class="action-subtitle">All LMI regions</div>
+                        </div>
+                        <i class="fas fa-chevron-right" style="color:#ccc"></i>
+                    </div>
+                </div>
 
-    <a class="region" href="emg_map_lynchburg_central.html">
-        <b>Lynchburg & Central VA</b><br>
-        <small>Lynchburg, Bedford, Campbell, Charlottesville, Albemarle, Orange</small>
-    </a>
+                <div class="section-title">Leaderboard</div>
+                <div class="action-card">
+                    <div class="action-icon orange"><i class="fas fa-trophy"></i></div>
+                    <div class="action-text">
+                        <div class="action-title">You're #3 This Week</div>
+                        <div class="action-subtitle">2 deals behind #1</div>
+                    </div>
+                </div>
+            </section>
 
-    <a class="region" href="emg_map_northern_va.html">
-        <b>Northern Virginia</b><br>
-        <small>Fairfax, Arlington, Alexandria, Prince William, Loudoun, Fredericksburg</small>
-    </a>
+            <!-- Map Screen -->
+            <section id="screen-map" class="screen">
+                <div id="map"></div>
+                <div class="map-controls">
+                    <button class="map-btn" onclick="locateMe()"><i class="fas fa-crosshairs"></i></button>
+                    <button class="map-btn" onclick="toggleSatellite()"><i class="fas fa-satellite"></i></button>
+                </div>
+                <div class="zone-legend">
+                    <div class="legend-item"><div class="legend-color" style="background:#2563eb"></div> LMI Auto-Qualify</div>
+                    <div class="legend-item"><div class="legend-color" style="background:#ef4444"></div> Hot Target</div>
+                    <div class="legend-item"><div class="legend-color" style="background:#22c55e"></div> Completed</div>
+                </div>
+                <div class="next-target-card" id="target-card">
+                    <div class="target-score score-hot" id="target-score">--</div>
+                    <div class="target-info">
+                        <div class="target-address" id="target-addr">Select a target</div>
+                        <div class="target-details" id="target-detail">Tap a marker on the map</div>
+                        <div class="target-tags" id="target-tags"></div>
+                    </div>
+                    <button class="nav-btn" onclick="navigateTo()"><i class="fas fa-location-arrow"></i></button>
+                </div>
+            </section>
 
-    <a class="region" href="emg_map_northern_neck.html">
-        <b>Northern Neck & Middle Peninsula</b><br>
-        <small>Lancaster, Northumberland, Westmoreland, Essex, King William</small>
-    </a>
+            <!-- Route Screen -->
+            <section id="screen-route" class="screen route-list">
+                <div class="route-header">
+                    <div>
+                        <div class="route-title">Today's Route</div>
+                        <div class="route-meta" id="route-meta">Loading...</div>
+                    </div>
+                    <button class="btn btn-primary btn-sm" onclick="reoptimize()"><i class="fas fa-magic"></i> Optimize</button>
+                </div>
+                <div id="route-stops"></div>
+            </section>
 
-    <hr style="margin: 30px 0;">
-    <p><small>
-        <b>Daily Target:</b> 10 deals / 100k kWh<br>
-        All maps include GPS locate and fullscreen mode for mobile.
-    </small></p>
+            <!-- Zone Browser -->
+            <section id="screen-zones" class="screen">
+                <div style="padding:16px">
+                    <div class="route-title">Select Region</div>
+                    <div class="route-meta">Choose your canvassing area</div>
+                </div>
+                <div class="region-grid">
+                    <div class="region-card" onclick="loadRegion('hampton_roads')">
+                        <i class="fas fa-water"></i>
+                        <div class="region-name">Hampton Roads</div>
+                        <div class="region-count">467 zones</div>
+                    </div>
+                    <div class="region-card" onclick="loadRegion('richmond')">
+                        <i class="fas fa-city"></i>
+                        <div class="region-name">Richmond</div>
+                        <div class="region-count">291 zones</div>
+                    </div>
+                    <div class="region-card" onclick="loadRegion('petersburg_southside')">
+                        <i class="fas fa-tree"></i>
+                        <div class="region-name">Southside</div>
+                        <div class="region-count">124 zones</div>
+                    </div>
+                    <div class="region-card" onclick="loadRegion('lynchburg_central')">
+                        <i class="fas fa-mountain"></i>
+                        <div class="region-name">Central VA</div>
+                        <div class="region-count">179 zones</div>
+                    </div>
+                    <div class="region-card" onclick="loadRegion('northern_va')">
+                        <i class="fas fa-building"></i>
+                        <div class="region-name">Northern VA</div>
+                        <div class="region-count">667 zones</div>
+                    </div>
+                    <div class="region-card" onclick="loadRegion('northern_neck')">
+                        <i class="fas fa-anchor"></i>
+                        <div class="region-name">Northern Neck</div>
+                        <div class="region-count">32 zones</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profile -->
+            <section id="screen-profile" class="screen dashboard">
+                <div class="greeting">My Stats</div>
+                <div class="stats-grid mt-2">
+                    <div class="stat-card">
+                        <div class="stat-value">$52k</div>
+                        <div class="stat-label">This Month</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">127</div>
+                        <div class="stat-label">Career Deals</div>
+                    </div>
+                </div>
+                <div class="section-title">Settings</div>
+                <div class="action-list">
+                    <div class="action-card">
+                        <div class="action-icon blue"><i class="fas fa-map-pin"></i></div>
+                        <div class="action-text">
+                            <div class="action-title">My Territory</div>
+                            <div class="action-subtitle" id="my-territory">Hampton Roads</div>
+                        </div>
+                    </div>
+                    <div class="action-card" onclick="resetData()">
+                        <div class="action-icon orange"><i class="fas fa-redo"></i></div>
+                        <div class="action-text">
+                            <div class="action-title">Reset Today's Data</div>
+                            <div class="action-subtitle">Start fresh</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="nav('home')"><i class="fas fa-home"></i><span>Home</span></div>
+            <div class="nav-item" onclick="nav('map')"><i class="fas fa-map"></i><span>Map</span></div>
+            <div class="nav-item" onclick="nav('route')"><i class="fas fa-route"></i><span>Route</span></div>
+            <div class="nav-item" onclick="nav('zones')"><i class="fas fa-th-large"></i><span>Zones</span></div>
+            <div class="nav-item" onclick="nav('profile')"><i class="fas fa-user"></i><span>Profile</span></div>
+        </nav>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // === STATE ===
+        let map, userLoc, satLayer, streetLayer, currentTarget = null;
+        let stats = JSON.parse(localStorage.getItem('emg_stats') || '{"deals":0,"doors":0,"kwh":0}');
+        let route = [];
+
+        // === INIT ===
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric'});
+            updateStats();
+            genRoute();
+        });
+
+        // === SCORING ALGORITHM ===
+        function score(a) {
+            let s = 50;
+            if (a.lmi) s += 30;
+            if (a.kwh > 1200) s += 20; else if (a.kwh > 900) s += 10;
+            if (a.owner) s += 15;
+            if (a.year < 1990) s += 10; else if (a.year < 2005) s += 5;
+            if (a.sqft > 2000) s += 10; else if (a.sqft > 1500) s += 5;
+            return Math.min(99, s);
+        }
+
+        // === ROUTE ===
+        function genRoute() {
+            const addrs = [
+                {addr:'1247 Oak St', lat:36.8508, lng:-76.2859, lmi:true, kwh:1400, owner:true, year:1985, sqft:2200},
+                {addr:'892 Pine Ave', lat:36.8515, lng:-76.2872, lmi:true, kwh:1100, owner:true, year:1992, sqft:1800},
+                {addr:'445 Maple Dr', lat:36.8498, lng:-76.2845, lmi:true, kwh:1350, owner:true, year:1978, sqft:2400},
+                {addr:'2103 Cedar Ln', lat:36.8522, lng:-76.2890, lmi:false, kwh:950, owner:true, year:2001, sqft:1600},
+                {addr:'678 Birch Rd', lat:36.8505, lng:-76.2835, lmi:true, kwh:1250, owner:false, year:1988, sqft:1900},
+                {addr:'1556 Elm Ct', lat:36.8530, lng:-76.2865, lmi:true, kwh:1500, owner:true, year:1975, sqft:2600},
+                {addr:'334 Willow Way', lat:36.8492, lng:-76.2855, lmi:true, kwh:1150, owner:true, year:1995, sqft:1750},
+                {addr:'2890 Spruce St', lat:36.8518, lng:-76.2842, lmi:false, kwh:1050, owner:true, year:2008, sqft:1450},
+            ];
+            route = addrs.map(a => ({...a, score: score(a), status:'pending'})).sort((a,b) => b.score - a.score);
+            renderRoute();
+            document.getElementById('hot-leads-count').textContent = route.filter(r => r.score >= 80).length + ' hot leads nearby';
+        }
+
+        function renderRoute() {
+            const c = document.getElementById('route-stops');
+            const pending = route.filter(r => r.status === 'pending').length;
+            document.getElementById('route-meta').textContent = `${pending} stops remaining`;
+            c.innerHTML = route.map((s,i) => `
+                <div class="stop-card ${s.status}">
+                    <div class="stop-number">${i+1}</div>
+                    <div class="stop-content">
+                        <div class="stop-address">${s.addr}</div>
+                        <div class="stop-meta">Score: ${s.score} ${s.lmi?'• LMI':''} ${s.owner?'• Owner':''}</div>
+                    </div>
+                    <div class="stop-actions">
+                        ${s.status==='pending'?`
+                            <button class="stop-btn sold" onclick="markSold(${i})">Sold!</button>
+                            <button class="stop-btn done" onclick="markDone(${i})">Done</button>
+                            <button class="stop-btn skip" onclick="markSkip(${i})">Skip</button>
+                        `:'<span style="color:#666;font-size:11px">'+s.status+'</span>'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function markDone(i) { route[i].status = 'completed'; stats.doors++; updateStats(); renderRoute(); }
+        function markSkip(i) { route[i].status = 'skipped'; renderRoute(); }
+        function markSold(i) { route[i].status = 'SOLD'; stats.deals++; stats.doors++; stats.kwh += 10; updateStats(); renderRoute(); confetti(); }
+        function reoptimize() { route.sort((a,b) => b.score - a.score); renderRoute(); alert('Route re-optimized!'); }
+
+        // === STATS ===
+        function updateStats() {
+            document.getElementById('deals-today').textContent = stats.deals;
+            document.getElementById('h-deals').textContent = stats.deals;
+            document.getElementById('h-kwh').textContent = stats.kwh;
+            document.getElementById('doors-count').textContent = stats.doors;
+            document.getElementById('deal-bar').style.width = (stats.deals/10*100)+'%';
+            document.getElementById('conv-rate').textContent = stats.doors ? Math.round(stats.deals/stats.doors*100)+'%' : '0%';
+            localStorage.setItem('emg_stats', JSON.stringify(stats));
+        }
+
+        function resetData() { if(confirm('Reset today?')){ stats={deals:0,doors:0,kwh:0}; updateStats(); genRoute(); }}
+
+        // === MAP ===
+        function initMap() {
+            if (map) { map.invalidateSize(); return; }
+            map = L.map('map').setView([36.85, -76.28], 14);
+            streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+
+            // LMI Zone polygon
+            L.polygon([[36.847,-76.295],[36.847,-76.275],[36.858,-76.275],[36.858,-76.295]], {
+                color:'#2563eb', fillColor:'#2563eb', fillOpacity:0.25, weight:2
+            }).addTo(map).bindPopup('<b>LMI Auto-Qualify Zone</b><br>Customers pre-qualify for state benefits');
+
+            // Route markers
+            route.forEach((s,i) => {
+                const col = s.score >= 80 ? '#ef4444' : s.score >= 60 ? '#f59e0b' : '#3b82f6';
+                L.circleMarker([s.lat, s.lng], {radius:12, fillColor:col, color:'#fff', weight:2, fillOpacity:0.9})
+                    .addTo(map)
+                    .on('click', () => selectTarget(s));
+            });
+
+            locateMe();
+        }
+
+        function selectTarget(t) {
+            currentTarget = t;
+            document.getElementById('target-score').textContent = t.score;
+            document.getElementById('target-score').className = 'target-score ' + (t.score>=80?'score-hot':t.score>=60?'score-warm':'score-cool');
+            document.getElementById('target-addr').textContent = t.addr;
+            document.getElementById('target-detail').textContent = (t.owner?'Owner':'Renter') + ' • Est. ' + t.kwh + ' kWh/mo';
+            document.getElementById('target-tags').innerHTML =
+                (t.lmi?'<span class="tag tag-lmi">LMI Zone</span>':'') +
+                (t.kwh>1200?'<span class="tag tag-highkwh">High kWh</span>':'') +
+                (t.owner?'<span class="tag tag-owner">Owner</span>':'');
+        }
+
+        function navigateTo() {
+            if (!currentTarget) return alert('Select a target first');
+            window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentTarget.lat},${currentTarget.lng}&travelmode=walking`);
+        }
+
+        function locateMe() {
+            if (!navigator.geolocation) return;
+            navigator.geolocation.getCurrentPosition(p => {
+                userLoc = [p.coords.latitude, p.coords.longitude];
+                map.setView(userLoc, 15);
+                L.marker(userLoc, {icon: L.divIcon({className:'', html:'<div style="background:#3b82f6;width:14px;height:14px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>'})}).addTo(map);
+            });
+        }
+
+        function toggleSatellite() {
+            if (map.hasLayer(satLayer)) { map.removeLayer(satLayer); map.addLayer(streetLayer); }
+            else { map.removeLayer(streetLayer); map.addLayer(satLayer); }
+        }
+
+        function loadRegion(r) {
+            alert('Loading ' + r + ' zone map...');
+            window.open('emg_map_' + r + '.html');
+        }
+
+        // === NAV ===
+        function nav(s) {
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById('screen-'+s).classList.add('active');
+            const idx = {home:0,map:1,route:2,zones:3,profile:4};
+            document.querySelectorAll('.nav-item')[idx[s]].classList.add('active');
+            if (s === 'map') setTimeout(initMap, 50);
+        }
+
+        // === FUN ===
+        function confetti() {
+            const c = document.createElement('div');
+            c.innerHTML = '🎉';
+            c.style.cssText = 'position:fixed;top:50%;left:50%;font-size:80px;z-index:9999;animation:pop 0.5s ease-out forwards';
+            document.body.appendChild(c);
+            setTimeout(() => c.remove(), 600);
+        }
+    </script>
+    <style>@keyframes pop{0%{transform:scale(0);opacity:1}100%{transform:scale(2);opacity:0}}</style>
 </body>
 </html>
