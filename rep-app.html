@@ -629,18 +629,15 @@
             console.log(`Loaded from ${source}:`, historicalStats);
         }
 
-        // Load both pin files
-        Promise.all([
-            fetch('va_sales_pins.geojson').then(r => r.ok ? r.json() : null).catch(() => null),
-            fetch('pins.geojson').then(r => r.ok ? r.json() : null).catch(() => null)
-        ]).then(([vaSales, oldPins]) => {
-            if (vaSales) addPinsToCluster(vaSales, 'va_sales_pins.geojson');
-            if (oldPins) addPinsToCluster(oldPins, 'pins.geojson');
-
-            // Add cluster group to map after all pins loaded
-            map.addLayer(historicalCluster);
-            console.log('Total historical pins:', historicalStats.total);
-        });
+        // Load VA sales pins only
+        fetch('va_sales_pins.geojson')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (data) addPinsToCluster(data, 'va_sales_pins.geojson');
+                map.addLayer(historicalCluster);
+                console.log('Total VA sales pins:', historicalStats.total);
+            })
+            .catch(() => console.log('No VA sales pins file'));
 
         // Update address on map move
         map.on('moveend', updateAddress);
