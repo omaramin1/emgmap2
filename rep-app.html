@@ -410,23 +410,15 @@
             <div class="legend">
                 <div class="legend-item">
                     <div class="legend-dot" style="background:#00ff88"></div>
-                    <span>New Deal</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot" style="background:#ffd93d"></div>
-                    <span>Callback</span>
+                    <span>Today's Pin</span>
                 </div>
                 <div class="legend-item">
                     <div class="legend-dot historical" style="background:#00cc66"></div>
-                    <span style="color:var(--muted)">Valid (old)</span>
+                    <span style="color:var(--muted)">Complete Sale</span>
                 </div>
                 <div class="legend-item">
                     <div class="legend-dot historical" style="background:#cc9900"></div>
                     <span style="color:var(--muted)">Pending</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-dot historical" style="background:#cc3333"></div>
-                    <span style="color:var(--muted)">Invalid</span>
                 </div>
             </div>
 
@@ -536,7 +528,7 @@
         // ========================================
         // MAP SETUP
         // ========================================
-        const map = L.map('map', { zoomControl: false }).setView([37.5, -77.5], 15);
+        const map = L.map('map', { zoomControl: false }).setView([37.54, -77.43], 12);
 
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             maxZoom: 20
@@ -653,7 +645,7 @@
             const total = historicalStats.total || 0;
 
             document.getElementById('addressMeta').textContent =
-                `Today: ${pins.length} | Historical: ${total.toLocaleString()} pins (${valid} valid, ${pending} pending)`;
+                `Today: ${pins.length} | VA Sales: ${total.toLocaleString()} (${valid} complete, ${pending} pending)`;
         }
 
         // ========================================
