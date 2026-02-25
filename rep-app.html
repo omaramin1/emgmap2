@@ -122,6 +122,34 @@
             color: var(--bg);
         }
 
+        /* Layer toggles */
+        .layer-toggles {
+            position: absolute;
+            top: 4rem;
+            right: 1rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+        .layer-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--card);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: var(--text);
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .layer-btn.active {
+            border-color: var(--accent);
+            background: rgba(0,212,255,0.2);
+        }
+
         /* Address display */
         .address-bar {
             position: absolute;
@@ -406,6 +434,12 @@
             <div class="crosshair">📍</div>
             <button class="gps-btn" id="gpsBtn" onclick="centerOnMe()">📍</button>
 
+            <!-- Layer toggles -->
+            <div class="layer-toggles">
+                <button class="layer-btn active" id="toggleLMI" onclick="toggleLayer('lmi')" title="LMI Zones">LMI</button>
+                <button class="layer-btn active" id="toggleZones" onclick="toggleLayer('zones')" title="Zone Data">Z</button>
+            </div>
+
             <!-- Legend -->
             <div class="legend">
                 <div class="legend-item">
@@ -492,37 +526,21 @@
         // ========================================
         // STATE
         // ========================================
-        let pins = [];  // Today's pins
-        let historicalPins = [];  // Old pins from data file
+        let pins = [];
+        let historicalPins = [];
         let stats = { deal: 0, callback: 0, 'not-home': 0, 'no-interest': 0, 'not-qualified': 0, dnc: 0 };
         let currentLocation = null;
         let userMarker = null;
 
         const icons = {
-            // Today's pins
             'deal': '💰', 'callback': '📞', 'not-home': '🏠',
             'no-interest': '✋', 'not-qualified': '❌', 'dnc': '🚫',
-            // Historical statuses
-            'complete': '✓', 'pending': '⏳', 'invalid': '✗',
-            'old-deal': '💰', 'old-callback': '📞', 'old-dnc': '🚫'
+            'complete': '✓', 'pending': '⏳', 'invalid': '✗'
         };
         const colors = {
-            // Today's pins - BRIGHT
-            'deal': '#00ff88',           // Bright green
-            'callback': '#ffd93d',       // Bright yellow
-            'not-home': '#555555',       // Gray
-            'no-interest': '#ff6b6b',    // Red
-            'not-qualified': '#8B4513',  // Brown
-            'dnc': '#1a1a1a',            // Black
-            // Historical - Valid
-            'complete': '#00cc66',       // Green (valid old deal)
-            'old-deal': '#00cc66',
-            // Historical - Pending
-            'pending': '#cc9900',        // Orange/yellow (needs follow-up)
-            'old-callback': '#cc9900',
-            // Historical - Invalid
-            'invalid': '#cc3333',        // Red (bad lead)
-            'old-dnc': '#660000'         // Dark red
+            'deal': '#00ff88', 'callback': '#ffd93d', 'not-home': '#555555',
+            'no-interest': '#ff6b6b', 'not-qualified': '#8B4513', 'dnc': '#1a1a1a',
+            'complete': '#00cc66', 'pending': '#cc9900', 'invalid': '#cc3333'
         };
 
         // ========================================
@@ -534,31 +552,108 @@
             maxZoom: 20
         }).addTo(map);
 
-        // Load LMI zones as background
+        // ========================================
+        // LAYER: LMI Zones
+        // ========================================
+        let lmiLayer = null;
         fetch('lmi_auto_qualify_zones.geojson')
             .then(r => r.json())
             .then(data => {
-                L.geoJSON(data, {
-                    style: { fillColor: '#00bfff', fillOpacity: 0.15, color: '#00ffff', weight: 1 }
+                lmiLayer = L.geoJSON(data, {
+                    style: f => {
+                        const pct = f.properties.avg_pct_low_income || 0;
+                        return {
+                            fillColor: pct > 80 ? '#00ff88' : pct > 60 ? '#00bfff' : '#ffd93d',
+                            fillOpacity: 0.2,
+                            color: '#00ffff',
+                            weight: 1
+                        };
+                    },
+                    onEachFeature: (f, layer) => {
+                        const p = f.properties;
+                        layer.bindPopup(`<div style="font-family:system-ui;font-size:13px;">
+                            <b>LMI Zone ${p.zone_id || ''}</b><br>
+                            <span style="color:#00ff88;font-size:18px;font-weight:bold">${Math.round(p.avg_pct_low_income || 0)}% LMI</span><br>
+                            <span style="color:#888">Census blocks: ${p.polygon_count || '?'}</span><br>
+                            <span style="color:#00bfff">Auto-qualifies for community solar</span>
+                        </div>`);
+                    }
                 }).addTo(map);
             }).catch(() => {});
 
-        // Create marker cluster group for historical pins (handles 30k+ pins efficiently)
+        // ========================================
+        // LAYER: Zone Data (kWh, households, scores)
+        // ========================================
+        let zoneLayer = null;
+        fetch('zone_data.geojson')
+            .then(r => r.json())
+            .then(data => {
+                zoneLayer = L.layerGroup();
+                data.features.forEach(f => {
+                    const p = f.properties;
+                    const lat = f.geometry.coordinates[1];
+                    const lng = f.geometry.coordinates[0];
+                    const kwh = p.daily_kwh || 0;
+                    const size = Math.max(15, Math.min(40, kwh / 2000));
+                    const tierColor = p.tier === 'Tier1' ? '#00ff88' : p.tier === 'Tier2' ? '#ffd93d' : '#ff6b6b';
+
+                    const icon = L.divIcon({
+                        className: '',
+                        html: `<div style="
+                            width:${size}px;height:${size}px;border-radius:50%;
+                            background:${tierColor};opacity:0.5;
+                            border:2px solid white;
+                            display:flex;align-items:center;justify-content:center;
+                            font-size:8px;font-weight:bold;color:#000;
+                        ">${p.rank}</div>`,
+                        iconSize: [size, size],
+                        iconAnchor: [size/2, size/2]
+                    });
+
+                    const popup = `<div style="font-family:system-ui;font-size:13px;">
+                        <b>#${p.rank} ${p.location}</b><br>
+                        <span style="color:${tierColor};font-weight:bold">${p.tier}</span>
+                        &bull; Score: ${p.score}<br>
+                        <b style="color:#ffd93d">${kwh.toLocaleString()} kWh/day</b><br>
+                        ${p.lmi_pct} LMI &bull; ${p.households.toLocaleString()} households
+                    </div>`;
+
+                    L.marker([lat, lng], { icon }).bindPopup(popup).addTo(zoneLayer);
+                });
+                zoneLayer.addTo(map);
+            }).catch(() => {});
+
+        // ========================================
+        // LAYER TOGGLES
+        // ========================================
+        function toggleLayer(name) {
+            const btn = document.getElementById('toggle' + name.charAt(0).toUpperCase() + name.slice(1));
+            if (name === 'lmi' && lmiLayer) {
+                if (map.hasLayer(lmiLayer)) { map.removeLayer(lmiLayer); btn.classList.remove('active'); }
+                else { map.addLayer(lmiLayer); btn.classList.add('active'); }
+            }
+            if (name === 'zones' && zoneLayer) {
+                if (map.hasLayer(zoneLayer)) { map.removeLayer(zoneLayer); btn.classList.remove('active'); }
+                else { map.addLayer(zoneLayer); btn.classList.add('active'); }
+            }
+        }
+
+        // ========================================
+        // SALES PINS (clustered)
+        // ========================================
         const historicalCluster = L.markerClusterGroup({
             maxClusterRadius: 50,
-            disableClusteringAtZoom: 17,  // Show individual pins when zoomed in close
+            disableClusteringAtZoom: 17,
             spiderfyOnMaxZoom: true,
             showCoverageOnHover: false,
-            chunkedLoading: true,  // Load in chunks for better performance
+            chunkedLoading: true,
             chunkInterval: 200,
             chunkDelay: 50,
-            // Custom cluster icon based on count
             iconCreateFunction: function(cluster) {
                 const count = cluster.getChildCount();
                 let size = 'small';
                 if (count >= 500) size = 'large';
                 else if (count >= 100) size = 'medium';
-
                 return L.divIcon({
                     html: `<div><span>${count}</span></div>`,
                     className: `marker-cluster marker-cluster-${size}`,
@@ -567,67 +662,76 @@
             }
         });
 
-        // Load historical pins from data files
-        let historicalStats = { complete: 0, pending: 0, invalid: 0, total: 0 };
+        let historicalStats = { complete: 0, pending: 0, total: 0 };
 
-        // Function to add pins to cluster
-        function addPinsToCluster(data, source) {
-            if (!data.features) return;
-            console.log(`Loading ${data.features.length} pins from ${source}...`);
+        function buildPopup(props, type) {
+            const lines = [];
 
-            data.features.forEach(f => {
-                const props = f.properties || {};
-                const type = props.type || 'complete';
-                const coords = f.geometry.coordinates;
-                const lat = coords[1];
-                const lng = coords[0];
+            // Address
+            if (props.address) {
+                lines.push(`<strong>${props.address}</strong>`);
+                lines.push(`${props.city || ''}, VA ${props.zip || ''}`);
+            } else if (props.city) {
+                lines.push(`<strong>${props.city}</strong>`);
+            }
 
-                historicalPins.push({ type, lat, lng, historical: true, props });
-                historicalStats[type] = (historicalStats[type] || 0) + 1;
-                historicalStats.total++;
+            // Status
+            const statusColor = type === 'complete' ? '#00cc66' : '#cc9900';
+            lines.push(`<span style="color:${statusColor};font-weight:bold">${type.toUpperCase()}</span>`);
 
-                // Color based on status
-                const color = colors[type] || colors.complete;
-                const icon = type === 'complete' ? '✓' : type === 'pending' ? '⏳' : '✗';
+            // Rep
+            if (props.rep) lines.push(`Rep: ${props.rep}`);
 
-                const marker = L.divIcon({
-                    className: 'pin-marker-wrapper',
-                    html: `<div class="pin-marker historical" style="background:${color}">${icon}</div>`,
-                    iconSize: [18, 18],
-                    iconAnchor: [9, 9]
-                });
+            // Date
+            if (props.sale_date) lines.push(`<span style="color:#888">Sale: ${props.sale_date}</span>`);
 
-                // Build popup with address if available
-                let popup;
-                if (props.address) {
-                    popup = `<div style="font-family: system-ui;">
-                        <strong>${props.address}</strong><br/>
-                        ${props.city || ''}, ${props.state || 'VA'} ${props.zip || ''}<br/>
-                        <span style="color: #666;">Sale: ${props.sale_date || props.date || ''}</span>
-                    </div>`;
-                } else {
-                    popup = `<b>${type.toUpperCase()}</b><br>
-                        ${props.rep || ''}<br>
-                        ${props.date || ''}<br>
-                        <span style="color:#888">${props.city || ''}</span>`;
-                }
+            // Dwelling
+            if (props.dwelling) lines.push(`<span style="color:#aaa">${props.dwelling}</span>`);
 
-                // Add to cluster group
-                const m = L.marker([lat, lng], { icon: marker }).bindPopup(popup);
-                historicalCluster.addLayer(m);
-            });
+            // LMI qualification
+            if (props.lmi_type) {
+                lines.push(`<span style="color:#00bfff;font-weight:bold">LMI: ${props.lmi_type}</span>`);
+            }
 
-            updateAddress();
-            console.log(`Loaded from ${source}:`, historicalStats);
+            // Order status
+            if (props.order_status) lines.push(`<span style="color:#888">Order: ${props.order_status}</span>`);
+
+            return `<div style="font-family:system-ui;font-size:12px;line-height:1.5">${lines.join('<br>')}</div>`;
         }
 
-        // Load VA sales pins only
         fetch('va_sales_pins.geojson')
             .then(r => r.ok ? r.json() : null)
             .then(data => {
-                if (data) addPinsToCluster(data, 'va_sales_pins.geojson');
+                if (!data || !data.features) return;
+                console.log(`Loading ${data.features.length} VA sales pins...`);
+
+                data.features.forEach(f => {
+                    const props = f.properties || {};
+                    const type = props.type || 'complete';
+                    const lat = f.geometry.coordinates[1];
+                    const lng = f.geometry.coordinates[0];
+
+                    historicalPins.push({ type, lat, lng, props });
+                    historicalStats[type] = (historicalStats[type] || 0) + 1;
+                    historicalStats.total++;
+
+                    const color = colors[type] || colors.complete;
+                    const icon = type === 'complete' ? '✓' : '⏳';
+
+                    const marker = L.divIcon({
+                        className: 'pin-marker-wrapper',
+                        html: `<div class="pin-marker historical" style="background:${color}">${icon}</div>`,
+                        iconSize: [18, 18],
+                        iconAnchor: [9, 9]
+                    });
+
+                    const m = L.marker([lat, lng], { icon: marker }).bindPopup(buildPopup(props, type));
+                    historicalCluster.addLayer(m);
+                });
+
                 map.addLayer(historicalCluster);
-                console.log('Total VA sales pins:', historicalStats.total);
+                updateAddress();
+                console.log('Loaded VA sales:', historicalStats);
             })
             .catch(() => console.log('No VA sales pins file'));
 
@@ -640,12 +744,12 @@
             document.getElementById('addressText').textContent =
                 `${center.lat.toFixed(5)}, ${center.lng.toFixed(5)}`;
 
-            const valid = historicalStats.complete || 0;
-            const pending = historicalStats.pending || 0;
-            const total = historicalStats.total || 0;
+            const c = historicalStats.complete || 0;
+            const p = historicalStats.pending || 0;
+            const t = historicalStats.total || 0;
 
             document.getElementById('addressMeta').textContent =
-                `Today: ${pins.length} | VA Sales: ${total.toLocaleString()} (${valid} complete, ${pending} pending)`;
+                `Today: ${pins.length} | VA Sales: ${t.toLocaleString()} (${c} complete, ${p} pending)`;
         }
 
         // ========================================
